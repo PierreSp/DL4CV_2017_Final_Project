@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-setup(name='BigProject',
+setup(name='DL4CV_2017_Final_Project',
       version='0.1',
       description='TBF',
       classifiers=[
