@@ -33,8 +33,8 @@ NUM_EPOCHS = opt.num_epochs
 G_TRIGGER_THRESHOLD = opt.g_trigger_threshold
 G_UPDATE_NUMBER = opt.g_update_number
 
-train_set = TrainDatasetFromFolder('data/VOC2012/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
-val_set = ValDatasetFromFolder('data/VOC2012/val', upscale_factor=UPSCALE_FACTOR)
+train_set = TrainDatasetFromFolder('data/VOCdevkit/VOC2012/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
+val_set = ValDatasetFromFolder('data/VOCdevkit/VOC2012/val', upscale_factor=UPSCALE_FACTOR)
 train_loader = DataLoader(dataset=train_set, num_workers=4, batch_size=64, shuffle=True)
 val_loader = DataLoader(dataset=val_set, num_workers=4, batch_size=1, shuffle=False)
 
