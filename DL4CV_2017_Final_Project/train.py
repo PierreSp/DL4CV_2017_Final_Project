@@ -16,14 +16,18 @@ from loss import GeneratorLoss
 from model import Generator, Discriminator
 
 parser = argparse.ArgumentParser(description='Train Super Resolution Models')
-parser.add_argument('--crop_size', default=88, type=int, help='training images crop size')
+parser.add_argument('--crop_size', default=88, type=int,
+                    help='training images crop size')
 parser.add_argument('--upscale_factor', default=4, type=int, choices=[2, 4, 8],
                     help='super resolution upscale factor')
 parser.add_argument('--g_trigger_threshold', default=0.2, type=float, choices=[0.1, 0.2, 0.3, 0.4, 0.5],
                     help='generator update trigger threshold')
 parser.add_argument('--g_update_number', default=2, type=int, choices=[1, 2, 3, 4, 5],
                     help='generator update number')
-parser.add_argument('--num_epochs', default=100, type=int, help='train epoch number')
+parser.add_argument('--num_epochs', default=100,
+                    type=int, help='train epoch number')
+parser.add_argument('--batch_size', default=64, type=int,
+                    help='batch size for training')
 
 opt = parser.parse_args()
 
@@ -32,16 +36,23 @@ UPSCALE_FACTOR = opt.upscale_factor
 NUM_EPOCHS = opt.num_epochs
 G_TRIGGER_THRESHOLD = opt.g_trigger_threshold
 G_UPDATE_NUMBER = opt.g_update_number
+BATCH_SIZE_TRAIN = opt.batch_size
 
-train_set = TrainDatasetFromFolder('data/VOCdevkit/VOC2012/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
-val_set = ValDatasetFromFolder('data/VOCdevkit/VOC2012/val', upscale_factor=UPSCALE_FACTOR)
-train_loader = DataLoader(dataset=train_set, num_workers=4, batch_size=64, shuffle=True)
-val_loader = DataLoader(dataset=val_set, num_workers=4, batch_size=1, shuffle=False)
+train_set = TrainDatasetFromFolder(
+    'data/VOCdevkit/VOC2012/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
+val_set = ValDatasetFromFolder(
+    'data/VOCdevkit/VOC2012/val', upscale_factor=UPSCALE_FACTOR)
+train_loader = DataLoader(dataset=train_set, num_workers=4,
+                          batch_size=BATCH_SIZE_TRAIN, shuffle=True)
+val_loader = DataLoader(dataset=val_set, num_workers=4,
+                        batch_size=1, shuffle=False)
 
 netG = Generator(UPSCALE_FACTOR)
-print('# generator parameters:', sum(param.numel() for param in netG.parameters()))
+print('# generator parameters:', sum(param.numel()
+                                     for param in netG.parameters()))
 netD = Discriminator()
-print('# discriminator parameters:', sum(param.numel() for param in netD.parameters()))
+print('# discriminator parameters:', sum(param.numel()
+                                         for param in netD.parameters()))
 
 generator_criterion = GeneratorLoss()
 
@@ -53,11 +64,13 @@ if torch.cuda.is_available():
 optimizerG = optim.Adam(netG.parameters())
 optimizerD = optim.Adam(netD.parameters())
 
-results = {'d_loss': [], 'g_loss': [], 'd_score': [], 'g_score': [], 'psnr': [], 'ssim': []}
+results = {'d_loss': [], 'g_loss': [], 'd_score': [],
+           'g_score': [], 'psnr': [], 'ssim': []}
 
 for epoch in range(1, NUM_EPOCHS + 1):
     train_bar = tqdm(train_loader)
-    running_results = {'batch_sizes': 0, 'd_loss': 0, 'g_loss': 0, 'd_score': 0, 'g_score': 0}
+    running_results = {'batch_sizes': 0, 'd_loss': 0,
+                       'g_loss': 0, 'd_score': 0, 'g_score': 0}
 
     netG.train()
     netD.train()
@@ -107,7 +120,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
         running_results['g_score'] += fake_out.data[0] * batch_size
 
         train_bar.set_description(desc='[%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f' % (
-            epoch, NUM_EPOCHS, running_results['d_loss'] / running_results['batch_sizes'],
+            epoch, NUM_EPOCHS, running_results[
+                'd_loss'] / running_results['batch_sizes'],
             running_results['g_loss'] / running_results['batch_sizes'],
             running_results['d_score'] / running_results['batch_sizes'],
             running_results['g_score'] / running_results['batch_sizes']))
@@ -117,7 +131,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
     if not os.path.exists(out_path):
         os.makedirs(out_path)
     val_bar = tqdm(val_loader)
-    valing_results = {'mse': 0, 'ssims': 0, 'psnr': 0, 'ssim': 0, 'batch_sizes': 0}
+    valing_results = {'mse': 0, 'ssims': 0,
+                      'psnr': 0, 'ssim': 0, 'batch_sizes': 0}
     val_images = []
     for val_lr, val_hr_restore, val_hr in val_bar:
         batch_size = val_lr.size(0)
@@ -133,8 +148,10 @@ for epoch in range(1, NUM_EPOCHS + 1):
         valing_results['mse'] += batch_mse * batch_size
         batch_ssim = pytorch_ssim.ssim(sr, hr).data[0]
         valing_results['ssims'] += batch_ssim * batch_size
-        valing_results['psnr'] = 10 * log10(1 / (valing_results['mse'] / valing_results['batch_sizes']))
-        valing_results['ssim'] = valing_results['ssims'] / valing_results['batch_sizes']
+        valing_results[
+            'psnr'] = 10 * log10(1 / (valing_results['mse'] / valing_results['batch_sizes']))
+        valing_results['ssim'] = valing_results[
+            'ssims'] / valing_results['batch_sizes']
         val_bar.set_description(
             desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
                 valing_results['psnr'], valing_results['ssim']))
@@ -148,17 +165,24 @@ for epoch in range(1, NUM_EPOCHS + 1):
     index = 1
     for image in val_save_bar:
         image = utils.make_grid(image, nrow=3, padding=5)
-        utils.save_image(image, out_path + 'epoch_%d_index_%d.png' % (epoch, index), padding=5)
+        utils.save_image(image, out_path + 'epoch_%d_index_%d.png' %
+                         (epoch, index), padding=5)
         index += 1
 
     # save model parameters
-    torch.save(netG.state_dict(), 'epochs/netG_epoch_%d_%d.pth' % (UPSCALE_FACTOR, epoch))
-    torch.save(netD.state_dict(), 'epochs/netD_epoch_%d_%d.pth' % (UPSCALE_FACTOR, epoch))
+    torch.save(netG.state_dict(), 'epochs/netG_epoch_%d_%d.pth' %
+               (UPSCALE_FACTOR, epoch))
+    torch.save(netD.state_dict(), 'epochs/netD_epoch_%d_%d.pth' %
+               (UPSCALE_FACTOR, epoch))
     # save loss\scores\psnr\ssim
-    results['d_loss'].append(running_results['d_loss'] / running_results['batch_sizes'])
-    results['g_loss'].append(running_results['g_loss'] / running_results['batch_sizes'])
-    results['d_score'].append(running_results['d_score'] / running_results['batch_sizes'])
-    results['g_score'].append(running_results['g_score'] / running_results['batch_sizes'])
+    results['d_loss'].append(
+        running_results['d_loss'] / running_results['batch_sizes'])
+    results['g_loss'].append(
+        running_results['g_loss'] / running_results['batch_sizes'])
+    results['d_score'].append(
+        running_results['d_score'] / running_results['batch_sizes'])
+    results['g_score'].append(
+        running_results['g_score'] / running_results['batch_sizes'])
     results['psnr'].append(valing_results['psnr'])
     results['ssim'].append(valing_results['ssim'])
 
@@ -168,4 +192,5 @@ for epoch in range(1, NUM_EPOCHS + 1):
             data={'Loss_D': results['d_loss'], 'Loss_G': results['g_loss'], 'Score_D': results['d_score'],
                   'Score_G': results['g_score'], 'PSNR': results['psnr'], 'SSIM': results['ssim']},
             index=range(1, epoch + 1))
-        data_frame.to_csv(out_path + 'srf_' + str(UPSCALE_FACTOR) + '_train_results.csv', index_label='Epoch')
+        data_frame.to_csv(out_path + 'srf_' + str(UPSCALE_FACTOR) +
+                          '_train_results.csv', index_label='Epoch')

@@ -47,8 +47,12 @@ class TrainDatasetFromFolder(Dataset):
         self.lr_transform = train_lr_transform(crop_size, upscale_factor)
 
     def __getitem__(self, index):
-        hr_image = self.hr_transform(Image.open(self.image_filenames[index]))
-        lr_image = self.lr_transform(hr_image)
+        try:
+            hr_image = self.hr_transform(Image.open(self.image_filenames[index]))
+            lr_image = self.lr_transform(hr_image)
+        except Exception as ex:
+            print(self.image_filenames[index])
+            print(ex)
         return lr_image, hr_image
 
     def __len__(self):
