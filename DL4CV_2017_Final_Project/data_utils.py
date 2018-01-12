@@ -131,7 +131,7 @@ class TestDatasetFromFolderPierre(Dataset):
         hr_image = CenterCrop(crop_size)(hr_image)
         lr_image = lr_scale(hr_image)
         hr_restore_img = hr_scale(lr_image)
-        image_name = self.lr_filenames[index].split('/')[-1]
+        image_name = self.image_filenames[index].split('/')[-1]
         return image_name, ToTensor()(lr_image), ToTensor()(hr_restore_img), ToTensor()(hr_image)
 
     def __len__(self):
