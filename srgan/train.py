@@ -1,6 +1,7 @@
 import argparse
 import os
 import logging
+import datetime
 from math import log10
 
 import pandas as pd
@@ -23,28 +24,35 @@ if detailedlog:
     niter = 100
     # we will do tensorboard...
 
-####################
-###    Args      ###
-####################
 
-parser = argparse.ArgumentParser(description='Train Super Resolution Models')
-parser.add_argument('--crop_size', default=88, type=int,
-                    help='training images crop size')
-parser.add_argument('--upscale_factor', default=4, type=int, choices=[2, 4, 8],
-                    help='super resolution upscale factor')
-parser.add_argument('--g_trigger_threshold', default=0.2, type=float, choices=[0.1, 0.2, 0.3, 0.4, 0.5],
-                    help='generator update trigger threshold')
-parser.add_argument('--g_update_number', default=2, type=int, choices=[1, 2, 3, 4, 5],
-                    help='generator update number')
-parser.add_argument('--num_epochs', default=100,
-                    type=int, help='train epoch number')
-parser.add_argument('--batch_size', default=64, type=int,
-                    help='batch size for training')
-parser.add_argument('--verbose', default=0, type=bool,
-                    help='create verbose logging file')
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Train Super Resolution Models')
+    parser.add_argument(
+        '--crop_size', default=88, type=int, help='training images crop size')
+    parser.add_argument(
+        '--upscale_factor', default=4, type=int, choices=[2, 4, 8],
+        help='super resolution upscale factor')
+    parser.add_argument(
+        '--g_trigger_threshold', default=0.2, type=float,
+        choices=[0.1, 0.2, 0.3, 0.4, 0.5],
+        help='generator update trigger threshold')
+    parser.add_argument(
+        '--g_update_number', default=2, type=int, choices=[1, 2, 3, 4, 5],
+        help='generator update number')
+    parser.add_argument(
+        '--num_epochs', default=100, type=int, help='train epoch number')
+    parser.add_argument(
+        '--batch_size', default=64, type=int, help='batch size for training')
+    parser.add_argument(
+        '--verbose', default=0, type=bool, help='create verbose logging file')
+    return parser.parse_args()
 
-opt = parser.parse_args()
 
+# Define Constants
+STATISTICS_PATH = 'logs/statistics/'
+
+opt = parse_args()
 CROP_SIZE = opt.crop_size
 UPSCALE_FACTOR = opt.upscale_factor
 NUM_EPOCHS = opt.num_epochs
@@ -56,25 +64,23 @@ VERBOSE = opt.verbose
 ####################
 ###    Logger    ###
 ####################
-
 logger = logging.getLogger('SRNET_logger')
 logger.setLevel(logging.INFO)
-# create file handler which logs even debug messages
-fh = logging.FileHandler(
-    os.getcwd() + 'logs/training.log')
+# Create file handler which logs even debug messages
+fh = logging.FileHandler('logs/training.log')
 if VERBOSE:
     print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
 else:
     fh.setLevel(logging.INFO)
-# create formatter and add it to the handlers
+# Create formatter and add it to the handlers
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
-# add the handlers to the logger
 logger.addHandler(fh)
 
 
+# DataLoaders
 train_set = TrainDatasetFromFolder(
     'data/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
 val_set = ValDatasetFromFolder(
@@ -84,12 +90,14 @@ train_loader = DataLoader(dataset=train_set, num_workers=4,
 val_loader = DataLoader(dataset=val_set, num_workers=4,
                         batch_size=1, shuffle=False)
 
+
+# Networks and Loss
 netG = Generator(UPSCALE_FACTOR)
-print('# generator parameters:', sum(param.numel()
-                                     for param in netG.parameters()))
+print('# generator parameters:',
+      sum(param.numel() for param in netG.parameters()))
 netD = Discriminator()
-print('# discriminator parameters:', sum(param.numel()
-                                         for param in netD.parameters()))
+print('# discriminator parameters:',
+      sum(param.numel() for param in netD.parameters()))
 
 generator_criterion = GeneratorLoss()
 
@@ -98,12 +106,16 @@ if torch.cuda.is_available():
     netD.cuda()
     generator_criterion.cuda()
 
+
+# Optimizer
 optimizerG = optim.Adam(netG.parameters())
 optimizerD = optim.Adam(netD.parameters())
 
 results = {'d_loss': [], 'g_loss': [], 'd_score': [],
            'g_score': [], 'psnr': [], 'ssim': []}
 
+
+# Actual training loop
 for epoch in range(1, NUM_EPOCHS + 1):
     train_bar = tqdm(train_loader)
     running_results = {'batch_sizes': 0, 'd_loss': 0,
@@ -229,10 +241,16 @@ for epoch in range(1, NUM_EPOCHS + 1):
     results['ssim'].append(valing_results['ssim'])
 
     if epoch % 10 == 0 and epoch != 0:
-        out_path = 'logs/statistics/'
         data_frame = pd.DataFrame(
-            data={'Loss_D': results['d_loss'], 'Loss_G': results['g_loss'], 'Score_D': results['d_score'],
-                  'Score_G': results['g_score'], 'PSNR': results['psnr'], 'SSIM': results['ssim']},
+            data={'Loss_D': results['d_loss'],
+                  'Loss_G': results['g_loss'],
+                  'Score_D': results['d_score'],
+                  'Score_G': results['g_score'],
+                  'PSNR': results['psnr'],
+                  'SSIM': results['ssim']},
             index=range(1, epoch + 1))
-        data_frame.to_csv(out_path + 'srf_' + str(UPSCALE_FACTOR) +
-                          '_train_results.csv', index_label='Epoch')
+        timestamp = datetime.datetime.now().strftime('%Y%m%d')
+        filename = '{}_srf_{}_train_results.csv'.format(
+            timestamp, UPSCALE_FACTOR)
+        filepath = os.path.join(STATISTICS_PATH, filename)
+        data_frame.to_csv(filepath, index_label='Epoch')
