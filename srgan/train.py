@@ -47,7 +47,7 @@ def parse_args():
     parser.add_argument(
         '--verbose', default=0, type=bool, help='create verbose logging file')
     parser.add_argument(
-        '--no-cuda', action='store_true', type=bool,
+        '--no-cuda', action='store_true',
         help='override cuda and use cpu, even if cuda is available')
     return parser.parse_args()
 
@@ -252,7 +252,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
                   'PSNR': results['psnr'],
                   'SSIM': results['ssim']},
             index=range(1, epoch + 1))
-        timestamp = datetime.datetime.now().strftime('%Y%m%d')
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
         filename = '{}_srf_{}_train_results.csv'.format(
             timestamp, UPSCALE_FACTOR)
         filepath = os.path.join(STATISTICS_PATH, filename)
