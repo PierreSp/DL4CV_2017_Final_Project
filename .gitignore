@@ -3,6 +3,16 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# data folders
+data/
+epochs/
+images/
+statistics/
+tests/
+training_results/
+benchmark_results/
+pytorch_ssim/
+
 # C extensions
 *.so
 
