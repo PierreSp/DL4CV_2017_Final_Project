@@ -1,5 +1,6 @@
 import argparse
 import os
+import logging
 from math import log10
 
 import pandas as pd
@@ -15,6 +16,17 @@ from data_utils import TrainDatasetFromFolder, ValDatasetFromFolder, display_tra
 from loss import GeneratorLoss
 from model import Generator, Discriminator
 
+# special functionality for plots
+# WARNING NEEDS HUGE AMOUNT OF RESSOURCES AND MEMORY
+detailedlog = 0
+if detailedlog:
+    niter = 100
+    # we will do tensorboard...
+
+####################
+###    Args      ###
+####################
+
 parser = argparse.ArgumentParser(description='Train Super Resolution Models')
 parser.add_argument('--crop_size', default=88, type=int,
                     help='training images crop size')
@@ -28,6 +40,8 @@ parser.add_argument('--num_epochs', default=100,
                     type=int, help='train epoch number')
 parser.add_argument('--batch_size', default=64, type=int,
                     help='batch size for training')
+parser.add_argument('--verbose', default=0, type=bool,
+                    help='create verbose logging file')
 
 opt = parser.parse_args()
 
@@ -37,6 +51,28 @@ NUM_EPOCHS = opt.num_epochs
 G_TRIGGER_THRESHOLD = opt.g_trigger_threshold
 G_UPDATE_NUMBER = opt.g_update_number
 BATCH_SIZE_TRAIN = opt.batch_size
+VERBOSE = opt.verbose
+
+####################
+###    Logger    ###
+####################
+
+logger = logging.getLogger('SRNET_logger')
+logger.setLevel(logging.INFO)
+# create file handler which logs even debug messages
+fh = logging.FileHandler(
+    os.getcwd() + '/logs/training.log')
+if VERBOSE:
+    fh.setLevel(logging.DEBUG)
+else:
+    fh.setLevel(logging.INFO)
+# create formatter and add it to the handlers
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+# add the handlers to the logger
+logger.addHandler(fh)
+
 
 train_set = TrainDatasetFromFolder(
     'data/VOCdevkit/VOC2012/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
@@ -104,11 +140,15 @@ for epoch in range(1, NUM_EPOCHS + 1):
         while ((real_out.data[0] - fake_out.data[0] > G_TRIGGER_THRESHOLD) or g_update_first) and (
                 index <= G_UPDATE_NUMBER):
             netG.zero_grad()
+            # Use vgg16 network as loss criterion
             g_loss = generator_criterion(fake_out, fake_img, real_img)
-            g_loss.backward()
+            g_loss.backward()  # backprop
             optimizerG.step()
             fake_img = netG(z)
             fake_out = netD(fake_img).mean()
+            logger.debug("Fake-output_ mean: " + str(fake_out))
+            logger.debug("Data 0 from gen: " + str(real_out.data[0]))
+            logger.debug("Data" + str(real_out.data))
             g_update_first = False
             index += 1
 
@@ -137,6 +177,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
     for val_lr, val_hr_restore, val_hr in val_bar:
         batch_size = val_lr.size(0)
         valing_results['batch_sizes'] += batch_size
+        # Use volatile for more eff (no backward possible)
         lr = Variable(val_lr, volatile=True)
         hr = Variable(val_hr, volatile=True)
         if torch.cuda.is_available():
@@ -144,10 +185,10 @@ for epoch in range(1, NUM_EPOCHS + 1):
             hr = hr.cuda()
         sr = netG(lr)
 
-        batch_mse = ((sr - hr) ** 2).data.mean()
+        batch_mse = ((sr - hr) ** 2).data.mean()  # Average image error
         valing_results['mse'] += batch_mse * batch_size
         batch_ssim = pytorch_ssim.ssim(sr, hr).data[0]
-        valing_results['ssims'] += batch_ssim * batch_size
+        valing_results['ssims'] += batch_ssim * batch_size  # ssims see google
         valing_results[
             'psnr'] = 10 * log10(1 / (valing_results['mse'] / valing_results['batch_sizes']))
         valing_results['ssim'] = valing_results[

@@ -4,6 +4,7 @@ from torchvision.models.vgg import vgg16
 
 
 class GeneratorLoss(nn.Module):
+
     def __init__(self):
         super(GeneratorLoss, self).__init__()
         vgg = vgg16(pretrained=True)
@@ -17,7 +18,8 @@ class GeneratorLoss(nn.Module):
         # Adversarial Loss
         adversarial_loss = torch.mean(1 - out_labels)
         # Perception Loss
-        perception_loss = self.mse_loss(self.loss_network(out_images), self.loss_network(target_images))
+        perception_loss = self.mse_loss(self.loss_network(
+            out_images), self.loss_network(target_images))
         # Image Loss
         image_loss = self.mse_loss(out_images, target_images)
         return image_loss + 0.001 * adversarial_loss + 0.006 * perception_loss
