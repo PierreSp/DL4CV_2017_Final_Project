@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument(
         '--batch_size', default=64, type=int, help='batch size for training')
     parser.add_argument(
-        '--verbose', default=0, type=bool, help='create verbose logging file')
+        '--verbose', action='store_true', help='create verbose logging file')
     parser.add_argument(
         '--no-cuda', action='store_true',
         help='override cuda and use cpu, even if cuda is available')
@@ -64,6 +64,7 @@ G_UPDATE_NUMBER = opt.g_update_number
 BATCH_SIZE_TRAIN = opt.batch_size
 VERBOSE = opt.verbose
 USE_CUDA = True if not opt.no_cuda and torch.cuda.is_available() else False
+TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
 
 ####################
 ###    Logger    ###
@@ -71,7 +72,7 @@ USE_CUDA = True if not opt.no_cuda and torch.cuda.is_available() else False
 logger = logging.getLogger('SRNET_logger')
 logger.setLevel(logging.INFO)
 # Create file handler which logs even debug messages
-fh = logging.FileHandler('logs/training.log')
+fh = logging.FileHandler('logs/training_{}.log'.format(TIMESTAMP))
 if VERBOSE:
     print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
@@ -156,7 +157,6 @@ for epoch in range(1, NUM_EPOCHS + 1):
         while ((real_out.data[0] - fake_out.data[0] > G_TRIGGER_THRESHOLD) or g_update_first) and (
                 index <= G_UPDATE_NUMBER):
             netG.zero_grad()
-            # Use vgg16 network as loss criterion
             g_loss = generator_criterion(fake_out, fake_img, real_img)
             g_loss.backward()  # backprop
             optimizerG.step()
@@ -185,7 +185,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
                          running_results['g_score'] / total_images_seen))
 
     netG.eval()
-    out_path = 'results/val/SRF_' + str(UPSCALE_FACTOR) + '/'
+    out_path = 'results/val/SRF_{}_{}/'.format(UPSCALE_FACTOR, TIMESTAMP)
     if not os.path.exists(out_path):
         os.makedirs(out_path)
     val_bar = tqdm(val_loader)
@@ -203,10 +203,10 @@ for epoch in range(1, NUM_EPOCHS + 1):
             hr = hr.cuda()
         sr = netG(lr)
 
-        batch_mse = ((sr - hr) ** 2).data.mean()          # Average image error
+        batch_mse = ((sr - hr) ** 2).data.mean()
         valing_results['mse'] += batch_mse * batch_size
         batch_ssim = pytorch_ssim.ssim(sr, hr).data[0]
-        valing_results['ssims'] += batch_ssim * batch_size  # ssims see google
+        valing_results['ssims'] += batch_ssim * batch_size
         valing_results['psnr'] = 10 * log10(
             1 / (valing_results['mse'] / valing_results['batch_sizes']))
         valing_results['ssim'] = (valing_results['ssims']
@@ -254,8 +254,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
                   'PSNR': results['psnr'],
                   'SSIM': results['ssim']},
             index=range(1, epoch + 1))
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
         filename = '{}_srf_{}_train_results.csv'.format(
-            timestamp, UPSCALE_FACTOR)
+            TIMESTAMP, UPSCALE_FACTOR)
         filepath = os.path.join(STATISTICS_PATH, filename)
         data_frame.to_csv(filepath, index_label='Epoch')
