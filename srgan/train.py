@@ -129,8 +129,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
     netD.train()
     for data, target in train_bar:
         g_update_first = True
-        batch_size = data.size(0)       # CURRENT batch size
-        running_results['batch_sizes'] += batch_size
+        batch_size = data.size(0)                       # CURRENT batch size
+        running_results['batch_sizes'] += batch_size    # TOTAL visited size
 
         ############################
         # (1) Update D network: maximize D(x)-1-D(G(z))
@@ -175,12 +175,14 @@ for epoch in range(1, NUM_EPOCHS + 1):
         running_results['d_score'] += real_out.data[0] * batch_size
         running_results['g_score'] += fake_out.data[0] * batch_size
 
-        train_bar.set_description(desc='[%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f' % (
-            epoch, NUM_EPOCHS, running_results[
-                'd_loss'] / running_results['batch_sizes'],
-            running_results['g_loss'] / running_results['batch_sizes'],
-            running_results['d_score'] / running_results['batch_sizes'],
-            running_results['g_score'] / running_results['batch_sizes']))
+        total_images_seen = running_results['batch_sizes']
+        train_bar.set_description(
+            desc='[%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f'
+                 .format(epoch, NUM_EPOCHS,
+                         running_results['d_loss'] / total_images_seen,
+                         running_results['g_loss'] / total_images_seen,
+                         running_results['d_score'] / total_images_seen,
+                         running_results['g_score'] / total_images_seen))
 
     netG.eval()
     out_path = 'results/val/SRF_' + str(UPSCALE_FACTOR) + '/'
@@ -201,14 +203,14 @@ for epoch in range(1, NUM_EPOCHS + 1):
             hr = hr.cuda()
         sr = netG(lr)
 
-        batch_mse = ((sr - hr) ** 2).data.mean()  # Average image error
+        batch_mse = ((sr - hr) ** 2).data.mean()          # Average image error
         valing_results['mse'] += batch_mse * batch_size
         batch_ssim = pytorch_ssim.ssim(sr, hr).data[0]
         valing_results['ssims'] += batch_ssim * batch_size  # ssims see google
-        valing_results[
-            'psnr'] = 10 * log10(1 / (valing_results['mse'] / valing_results['batch_sizes']))
-        valing_results['ssim'] = valing_results[
-            'ssims'] / valing_results['batch_sizes']
+        valing_results['psnr'] = 10 * log10(
+            1 / (valing_results['mse'] / valing_results['batch_sizes']))
+        valing_results['ssim'] = (valing_results['ssims']
+                                  / valing_results['batch_sizes'])
         val_bar.set_description(
             desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
                 valing_results['psnr'], valing_results['ssim']))
