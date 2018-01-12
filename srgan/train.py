@@ -61,7 +61,7 @@ logger = logging.getLogger('SRNET_logger')
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
 fh = logging.FileHandler(
-    os.getcwd() + 'logs/training.log')
+    os.getcwd() + '/logs/training.log')
 if VERBOSE:
     print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
