@@ -19,20 +19,24 @@ parser.add_argument('--upscale_factor', default=4, type=int,
                     help='super resolution upscale factor')
 parser.add_argument('--model_name', default='netG_epoch_4_100.pth',
                     type=str, help='generator model epoch name')
+parser.add_argument('--folder', default='test_pierre',
+                    type=str, help='define folder with test images')
+
 opt = parser.parse_args()
 
 UPSCALE_FACTOR = opt.upscale_factor
 MODEL_NAME = opt.model_name
+FOLDERNAME = opt.folder
 
-results = {'Set5': {'psnr': [], 'ssim': []}, 'Set14': {'psnr': [], 'ssim': []}, 'BSD100': {'psnr': [], 'ssim': []},
-           'Urban100': {'psnr': [], 'ssim': []}, 'SunHays80': {'psnr': [], 'ssim': []}}
+results = {'psnr': [], 'ssim': []}
 
 model = Generator(UPSCALE_FACTOR).eval()
 if torch.cuda.is_available():
     model = model.cuda()
 model.load_state_dict(torch.load('epochs/' + MODEL_NAME))
 
-test_set = TestDatasetFromFolder('data/test', upscale_factor=UPSCALE_FACTOR)
+test_set = TestDatasetFromFolder(
+    'data/' + str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
 test_loader = DataLoader(dataset=test_set, num_workers=4,
                          batch_size=1, shuffle=False)
 test_bar = tqdm(test_loader, desc='[testing benchmark datasets]')
@@ -62,8 +66,8 @@ for image_name, lr_image, hr_restore_img, hr_image in test_bar:
                      image_name.split('.')[-1], padding=5)
 
     # save psnr\ssim
-    results[image_name.split('_')[0]]['psnr'].append(psnr)
-    results[image_name.split('_')[0]]['ssim'].append(ssim)
+    results['psnr'].append(psnr)
+    results['ssim'].append(ssim)
 
 out_path = 'statistics/'
 saved_results = {'psnr': [], 'ssim': []}
