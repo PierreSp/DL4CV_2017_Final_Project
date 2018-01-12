@@ -14,12 +14,12 @@ import pytorch_ssim
 from data_utils import TestDatasetFromFolderPierre, display_transform
 from model import Generator
 
-parser = argparse.ArgumentParser(description='Test Pierre Datasets')
+parser = argparse.ArgumentParser(description='Test Datasets')
 parser.add_argument('--upscale_factor', default=4, type=int,
                     help='super resolution upscale factor')
-parser.add_argument('--model_name', default='netG_epoch_4_80.pth',
+parser.add_argument('--model_name', default='netG_epoch_4_83.pth',
                     type=str, help='generator model epoch name')
-parser.add_argument('--folder', default='test_pierre',
+parser.add_argument('--folder', default='test',
                     type=str, help='define folder with test images')
 
 opt = parser.parse_args()
@@ -33,15 +33,15 @@ results = {'psnr': [], 'ssim': []}
 model = Generator(UPSCALE_FACTOR).eval()
 if torch.cuda.is_available():
     model = model.cuda()
-model.load_state_dict(torch.load('epochs/' + MODEL_NAME))
+model.load_state_dict(torch.load('logs/epochs/' + MODEL_NAME))
 
 test_set = TestDatasetFromFolderPierre(
     'data/' + str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
 test_loader = DataLoader(dataset=test_set, num_workers=4,
                          batch_size=1, shuffle=False)
-test_bar = tqdm(test_loader, desc='[testing benchmark datasets]')
+test_bar = tqdm(test_loader, desc='[testing datasets]')
 
-out_path = 'benchmark_results/SRF_' + str(UPSCALE_FACTOR) + '/'
+out_path = 'results/test/SRF_' + str(UPSCALE_FACTOR) + '/'
 if not os.path.exists(out_path):
     os.makedirs(out_path)
 
@@ -69,7 +69,7 @@ for image_name, lr_image, hr_restore_img, hr_image in test_bar:
     results['psnr'].append(psnr)
     results['ssim'].append(ssim)
 
-out_path = 'statistics/'
+out_path = 'logs/statistics/'
 saved_results = {'psnr': [], 'ssim': []}
 for item in results.values():
     psnr = np.array(item['psnr'])

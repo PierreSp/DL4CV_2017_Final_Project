@@ -61,7 +61,7 @@ logger = logging.getLogger('SRNET_logger')
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
 fh = logging.FileHandler(
-    os.getcwd() + '/logs/training.log')
+    os.getcwd() + 'logs/training.log')
 if VERBOSE:
     print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
@@ -76,9 +76,9 @@ logger.addHandler(fh)
 
 
 train_set = TrainDatasetFromFolder(
-    'data/VOCdevkit/VOC2012/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
+    'data/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
 val_set = ValDatasetFromFolder(
-    'data/VOCdevkit/VOC2012/val', upscale_factor=UPSCALE_FACTOR)
+    'data/val', upscale_factor=UPSCALE_FACTOR)
 train_loader = DataLoader(dataset=train_set, num_workers=4,
                           batch_size=BATCH_SIZE_TRAIN, shuffle=True)
 val_loader = DataLoader(dataset=val_set, num_workers=4,
@@ -168,7 +168,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
             running_results['g_score'] / running_results['batch_sizes']))
 
     netG.eval()
-    out_path = 'training_results/SRF_' + str(UPSCALE_FACTOR) + '/'
+    out_path = 'results/val/SRF_' + str(UPSCALE_FACTOR) + '/'
     if not os.path.exists(out_path):
         os.makedirs(out_path)
     val_bar = tqdm(val_loader)
@@ -212,9 +212,9 @@ for epoch in range(1, NUM_EPOCHS + 1):
         index += 1
 
     # save model parameters
-    torch.save(netG.state_dict(), 'epochs/netG_epoch_%d_%d.pth' %
+    torch.save(netG.state_dict(), 'logs/epochs/netG_epoch_%d_%d.pth' %
                (UPSCALE_FACTOR, epoch))
-    torch.save(netD.state_dict(), 'epochs/netD_epoch_%d_%d.pth' %
+    torch.save(netD.state_dict(), 'logs/epochs/netD_epoch_%d_%d.pth' %
                (UPSCALE_FACTOR, epoch))
     # save loss\scores\psnr\ssim
     results['d_loss'].append(
@@ -229,7 +229,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
     results['ssim'].append(valing_results['ssim'])
 
     if epoch % 10 == 0 and epoch != 0:
-        out_path = 'statistics/'
+        out_path = 'logs/statistics/'
         data_frame = pd.DataFrame(
             data={'Loss_D': results['d_loss'], 'Loss_G': results['g_loss'], 'Score_D': results['d_score'],
                   'Score_G': results['g_score'], 'PSNR': results['psnr'], 'SSIM': results['ssim']},
