@@ -17,7 +17,7 @@ from model import Generator
 parser = argparse.ArgumentParser(description='Test Benchmark Datasets')
 parser.add_argument('--upscale_factor', default=4, type=int,
                     help='super resolution upscale factor')
-parser.add_argument('--model_name', default='netG_epoch_4_100.pth',
+parser.add_argument('--model_name', default='netG_epoch_4_80.pth',
                     type=str, help='generator model epoch name')
 parser.add_argument('--folder', default='test_pierre',
                     type=str, help='define folder with test images')

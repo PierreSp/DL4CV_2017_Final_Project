@@ -63,6 +63,7 @@ logger.setLevel(logging.INFO)
 fh = logging.FileHandler(
     os.getcwd() + '/logs/training.log')
 if VERBOSE:
+    print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
 else:
     fh.setLevel(logging.INFO)
