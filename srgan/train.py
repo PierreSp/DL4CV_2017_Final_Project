@@ -46,6 +46,9 @@ def parse_args():
         '--batch_size', default=64, type=int, help='batch size for training')
     parser.add_argument(
         '--verbose', default=0, type=bool, help='create verbose logging file')
+    parser.add_argument(
+        '--no-cuda', action='store_true', type=bool,
+        help='override cuda and use cpu, even if cuda is available')
     return parser.parse_args()
 
 
@@ -60,6 +63,7 @@ G_TRIGGER_THRESHOLD = opt.g_trigger_threshold
 G_UPDATE_NUMBER = opt.g_update_number
 BATCH_SIZE_TRAIN = opt.batch_size
 VERBOSE = opt.verbose
+USE_CUDA = True if not opt.no_cuda and torch.cuda.is_available() else False
 
 ####################
 ###    Logger    ###
@@ -101,7 +105,7 @@ print('# discriminator parameters:',
 
 generator_criterion = GeneratorLoss()
 
-if torch.cuda.is_available():
+if USE_CUDA:
     netG.cuda()
     netD.cuda()
     generator_criterion.cuda()
@@ -125,17 +129,16 @@ for epoch in range(1, NUM_EPOCHS + 1):
     netD.train()
     for data, target in train_bar:
         g_update_first = True
-        batch_size = data.size(0)
+        batch_size = data.size(0)       # CURRENT batch size
         running_results['batch_sizes'] += batch_size
 
         ############################
         # (1) Update D network: maximize D(x)-1-D(G(z))
         ###########################
         real_img = Variable(target)
-        if torch.cuda.is_available():
-            real_img = real_img.cuda()
         z = Variable(data)
-        if torch.cuda.is_available():
+        if USE_CUDA:
+            real_img = real_img.cuda()
             z = z.cuda()
         fake_img = netG(z)
 
@@ -193,7 +196,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
         # Use volatile for more eff (no backward possible)
         lr = Variable(val_lr, volatile=True)
         hr = Variable(val_hr, volatile=True)
-        if torch.cuda.is_available():
+        if USE_CUDA:
             lr = lr.cuda()
             hr = hr.cuda()
         sr = netG(lr)
