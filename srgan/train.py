@@ -163,8 +163,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
             fake_img = netG(z)
             fake_out = netD(fake_img).mean()
             logger.debug("Fake-output_ mean: " + str(fake_out))
-            logger.debug("Data 0 from gen: " + str(real_out.data[0]))
-            logger.debug("Data" + str(real_out.data))
+            logger.debug("Real out: " + str(real_out.data[0]))
             g_update_first = False
             index += 1
 

@@ -7,7 +7,7 @@ from torchvision.models.resnet import resnet101
 class GeneratorLoss(nn.Module):
 
     def __init__(self, weight_perception=0.006, weight_adversarial=0.001,
-                 weight_image=1, network="vgg19"):
+                 weight_image=1, network="vgg16"):
         super(GeneratorLoss, self).__init__()
         self.weight_image = weight_image
         self.weight_adversarial = weight_adversarial
