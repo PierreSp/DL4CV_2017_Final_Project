@@ -1,2 +1,0 @@
-Some images seem do be damage and cannot be openend by a image viewer and also not by pytorch. Remove them before training
-2008_001823.jpg
