@@ -70,9 +70,9 @@ TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
 ###    Logger    ###
 ####################
 logger = logging.getLogger('SRNET_logger')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 # Create file handler which logs even debug messages
-fh = logging.FileHandler('logs/training_{}.log'.format(TIMESTAMP))
+fh = logging.FileHandler('logs/debugging/training_{}.log'.format(TIMESTAMP))
 if VERBOSE:
     print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
