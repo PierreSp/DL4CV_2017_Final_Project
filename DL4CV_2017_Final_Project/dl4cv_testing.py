@@ -11,10 +11,10 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import pytorch_ssim
-from data_utils import TestDatasetFromFolder, display_transform
+from data_utils import TestDatasetFromFolderPierre, display_transform
 from model import Generator
 
-parser = argparse.ArgumentParser(description='Test Benchmark Datasets')
+parser = argparse.ArgumentParser(description='Test Pierre Datasets')
 parser.add_argument('--upscale_factor', default=4, type=int,
                     help='super resolution upscale factor')
 parser.add_argument('--model_name', default='netG_epoch_4_80.pth',
@@ -35,7 +35,7 @@ if torch.cuda.is_available():
     model = model.cuda()
 model.load_state_dict(torch.load('epochs/' + MODEL_NAME))
 
-test_set = TestDatasetFromFolder(
+test_set = TestDatasetFromFolderPierre(
     'data/' + str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
 test_loader = DataLoader(dataset=test_set, num_workers=4,
                          batch_size=1, shuffle=False)
