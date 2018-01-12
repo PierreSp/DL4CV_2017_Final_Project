@@ -1,3 +1,9 @@
+# Data Folders
+data/
+results/
+logs/
+
+###############################################################################
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
