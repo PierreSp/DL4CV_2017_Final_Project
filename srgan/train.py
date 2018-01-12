@@ -158,7 +158,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
                 index <= G_UPDATE_NUMBER):
             netG.zero_grad()
             g_loss = generator_criterion(fake_out, fake_img, real_img)
-            g_loss.backward()  # backprop
+            g_loss.backward()
             optimizerG.step()
             fake_img = netG(z)
             fake_out = netD(fake_img).mean()
@@ -177,7 +177,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
 
         total_images_seen = running_results['batch_sizes']
         train_bar.set_description(
-            desc='[%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f'
+            desc='[{}/{}] Loss_D: {:4f} Loss_G: {:4f} D(x): {:4f} D(G(z)): {:4f}'
                  .format(epoch, NUM_EPOCHS,
                          running_results['d_loss'] / total_images_seen,
                          running_results['g_loss'] / total_images_seen,
