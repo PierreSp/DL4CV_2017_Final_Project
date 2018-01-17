@@ -53,12 +53,10 @@ def parse_args():
         '--network', default="vgg19", type=str, help='Options: "vgg16" and "vgg19"')
     parser.add_argument(
         '--weight_perception', default=0.006, type=float, help='define the loss multiplicator for the perception')
-    return parser.parse_args()
     parser.add_argument(
-        '--weight_adversarial', default=0.001, type=float, help='define the loss multiplicator for the perception')
-    return parser.parse_args()
+        '--weight_adversarial', default=0.001, type=float, help='define the loss multiplicator for the adv net')
     parser.add_argument(
-        '--weight_image', default=1.0, type=float, help='define the loss multiplicator for the perception')
+        '--weight_image', default=1.0, type=float, help='define the loss multiplicator for the mse image loss')
     return parser.parse_args()
 
 
