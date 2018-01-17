@@ -49,6 +49,16 @@ def parse_args():
     parser.add_argument(
         '--no-cuda', action='store_true',
         help='override cuda and use cpu, even if cuda is available')
+    parser.add_argument(
+        '--network', default="vgg19", type=int, help='Options: "vgg16" and "vgg19"')
+    parser.add_argument(
+        '--weight_perception', default=0.006, type=float, help='define the loss multiplicator for the perception')
+    return parser.parse_args()
+    parser.add_argument(
+        '--weight_adversarial', default=0.001, type=float, help='define the loss multiplicator for the perception')
+    return parser.parse_args()
+    parser.add_argument(
+        '--weight_image', default=1.0, type=float, help='define the loss multiplicator for the perception')
     return parser.parse_args()
 
 
@@ -64,7 +74,14 @@ G_UPDATE_NUMBER = opt.g_update_number
 BATCH_SIZE_TRAIN = opt.batch_size
 VERBOSE = opt.verbose
 USE_CUDA = True if not opt.no_cuda and torch.cuda.is_available() else False
+NETWORK = opt.network
+WEIGHT_PERCEPTION = opt.weight_perception
+WEIGHT_ADVERSARIAL = opt.weight_adversarial
+WEIGHT_IMAGE = opt.weight_image
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
+# Ja format waere klueger gewesen :P
+FILENAMEEXT = str(TIMESTAMP) + "-" + str(NETWORK) + "-perc" + str(WEIGHT_PERCEPTION) + \
+    "-adv" + str(WEIGHT_ADVERSARIAL) + "-img" + str(WEIGHT_IMAGE)
 
 ####################
 ###    Logger    ###
@@ -72,7 +89,7 @@ TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
 logger = logging.getLogger('SRNET_logger')
 logger.setLevel(logging.DEBUG)
 # Create file handler which logs even debug messages
-fh = logging.FileHandler('logs/debugging/training_{}.log'.format(TIMESTAMP))
+fh = logging.FileHandler('logs/debugging/training_{}.log'.format(FILENAMEEXT))
 if VERBOSE:
     print("Net is verbose. Not intended for long training")
     fh.setLevel(logging.DEBUG)
@@ -104,7 +121,8 @@ netD = Discriminator()
 print('# discriminator parameters:',
       sum(param.numel() for param in netD.parameters()))
 
-generator_criterion = GeneratorLoss()
+generator_criterion = GeneratorLoss(weight_perception=WEIGHT_PERCEPTION,
+                                    weight_adversarial=WEIGHT_ADVERSARIAL, weight_image=WEIGHT_IMAGE, network=NETWORK)
 
 if USE_CUDA:
     netG.cuda()
@@ -184,7 +202,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
                          running_results['g_score'] / total_images_seen))
 
     netG.eval()
-    out_path = 'results/val/SRF_{}_{}/'.format(UPSCALE_FACTOR, TIMESTAMP)
+    out_path = 'results/val/SRF_{}_{}/'.format(UPSCALE_FACTOR, FILENAMEEXT)
     if not os.path.exists(out_path):
         os.makedirs(out_path)
     val_bar = tqdm(val_loader)
@@ -208,8 +226,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
         valing_results['ssims'] += batch_ssim * batch_size
         valing_results['psnr'] = 10 * log10(
             1 / (valing_results['mse'] / valing_results['batch_sizes']))
-        valing_results['ssim'] = (valing_results['ssims']
-                                  / valing_results['batch_sizes'])
+        valing_results['ssim'] = (valing_results['ssims'] / valing_results['batch_sizes'])
         val_bar.set_description(
             desc='[converting LR images to SR images] PSNR: %.4f dB SSIM: %.4f' % (
                 valing_results['psnr'], valing_results['ssim']))
@@ -228,10 +245,15 @@ for epoch in range(1, NUM_EPOCHS + 1):
         index += 1
 
     # save model parameters
-    torch.save(netG.state_dict(), 'logs/epochs/netG_epoch_%d_%d.pth' %
-               (UPSCALE_FACTOR, epoch))
-    torch.save(netD.state_dict(), 'logs/epochs/netD_epoch_%d_%d.pth' %
-               (UPSCALE_FACTOR, epoch))
+    weight_path = 'logs/epochs/SRF_{}_{}/'.format(UPSCALE_FACTOR, FILENAMEEXT)
+    if not os.path.exists(weight_path):
+        os.makedirs(weight_path)
+    netG_filename = 'netG_epoch_{}.pth'.format(epoch)
+    netD_filename = 'netD_epoch_{}.pth'.format(epoch)
+    netG_filepath = os.path.join(weight_path, netG_filename)
+    netD_filepath = os.path.join(weight_path, netD_filename)
+    torch.save(netG.state_dict(), netG_filepath)
+    torch.save(netD.state_dict(), netD_filepath)
     # save loss\scores\psnr\ssim
     results['d_loss'].append(
         running_results['d_loss'] / running_results['batch_sizes'])
@@ -254,6 +276,6 @@ for epoch in range(1, NUM_EPOCHS + 1):
                   'SSIM': results['ssim']},
             index=range(1, epoch + 1))
         filename = '{}_srf_{}_train_results.csv'.format(
-            TIMESTAMP, UPSCALE_FACTOR)
+            FILENAMEEXT, UPSCALE_FACTOR)
         filepath = os.path.join(STATISTICS_PATH, filename)
         data_frame.to_csv(filepath, index_label='Epoch')
