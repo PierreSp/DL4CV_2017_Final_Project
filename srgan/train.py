@@ -199,8 +199,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
             fake_out = Variable(torch.FloatTensor(1))
             real_out = Variable(torch.FloatTensor(1))
             if USE_CUDA:
-                fake_out.cuda(GPU_ID)
-                real_out.cuda(GPU_ID)
+                fake_out = fake_out.cuda(GPU_ID)
+                real_out = real_out.cuda(GPU_ID)
 
         ############################
         # (2) Update G network: minimize 1-D(G(z)) + Perception Loss + Image Loss
