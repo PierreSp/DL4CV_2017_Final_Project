@@ -31,7 +31,7 @@ class GeneratorLoss(nn.Module):
                 *list(pretrained_net_vgg16.features)[:31]).eval()
             pretrained_net_vgg19 = vgg19(pretrained=True)
             loss_network_vgg19 = nn.Sequential(
-                *list(pretrained_net_vgg19.features)[:27]).eval5()
+                *list(pretrained_net_vgg19.features)[:27]).eval()
             for param in loss_network_vgg19.parameters():
                 param.requires_grad = False
             self.loss_network_vgg19 = loss_network_vgg19
