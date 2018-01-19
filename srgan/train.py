@@ -161,7 +161,8 @@ results = {'d_loss': [], 'g_loss': [], 'd_score': [],
 
 # Actual training loop
 for epoch in range(1, NUM_EPOCHS + 1):
-    train_bar = tqdm(train_loader)
+    # train_bar = tqdm(train_loader)
+    train_bar = train_loader
     running_results = {'batch_sizes': 0, 'd_loss': 0,
                        'g_loss': 0, 'd_score': 0, 'g_score': 0}
 
@@ -224,13 +225,13 @@ for epoch in range(1, NUM_EPOCHS + 1):
         running_results['g_score'] += fake_out.data[0] * batch_size
 
         total_images_seen = running_results['batch_sizes']
-        train_bar.set_description(
-            desc='[{}/{}] Loss_D: {:4f} Loss_G: {:4f} D(x): {:4f} D(G(z)): {:4f}'
-                 .format(epoch, NUM_EPOCHS,
-                         running_results['d_loss'] / total_images_seen,
-                         running_results['g_loss'] / total_images_seen,
-                         running_results['d_score'] / total_images_seen,
-                         running_results['g_score'] / total_images_seen))
+        # train_bar.set_description(
+        #     desc='[{}/{}] Loss_D: {:4f} Loss_G: {:4f} D(x): {:4f} D(G(z)): {:4f}'
+        #          .format(epoch, NUM_EPOCHS,
+        #                  running_results['d_loss'] / total_images_seen,
+        #                  running_results['g_loss'] / total_images_seen,
+        #                  running_results['d_score'] / total_images_seen,
+        #                  running_results['g_score'] / total_images_seen))
 
     netG.eval()
     out_path = 'results/val/SRF_{}_{}/'.format(UPSCALE_FACTOR, FILENAMEEXT)
