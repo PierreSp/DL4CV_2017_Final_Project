@@ -87,11 +87,8 @@ WEIGHT_ADVERSARIAL = opt.weight_adversarial if not opt.no_discriminator else 0
 WEIGHT_IMAGE = opt.weight_image
 USE_DISCRIMINATOR = ~opt.no_discriminator
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
-FILENAMEEXT = (
-    str(TIMESTAMP) + "-" + str(NETWORK) +
-    "-perc" + str(WEIGHT_PERCEPTION) +
-    "-adv" + str(WEIGHT_ADVERSARIAL) +
-    "-img" + str(WEIGHT_IMAGE))
+FILENAMEEXT = '{}_{}_perc{}_adv{}_img{}'.format(
+    TIMESTAMP, NETWORK, WEIGHT_PERCEPTION, WEIGHT_ADVERSARIAL, WEIGHT_IMAGE)
 
 ####################
 ###    Logger    ###
