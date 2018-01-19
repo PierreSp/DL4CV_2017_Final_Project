@@ -50,7 +50,7 @@ def parse_args():
         '--no-cuda', action='store_true',
         help='override cuda and use cpu, even if cuda is available')
     parser.add_argument(
-        '--network', default="vgg19", type=str,
+        '--network', default="vgg16vgg19", type=str,
         help='Options: "vgg16", "vgg19", "vgg16vgg19"')
     parser.add_argument(
         '--weight_perception', default=0.006, type=float,
