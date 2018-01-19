@@ -116,9 +116,9 @@ train_set = TrainDatasetFromFolder(
     'data/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
 val_set = ValDatasetFromFolder(
     'data/val', upscale_factor=UPSCALE_FACTOR)
-train_loader = DataLoader(dataset=train_set, num_workers=4*NUM_GPU,
+train_loader = DataLoader(dataset=train_set,
                           batch_size=BATCH_SIZE_TRAIN, shuffle=True)
-val_loader = DataLoader(dataset=val_set, num_workers=4*NUM_GPU,
+val_loader = DataLoader(dataset=val_set,
                         batch_size=1, shuffle=False)
 
 
@@ -187,8 +187,12 @@ for epoch in range(1, NUM_EPOCHS + 1):
             d_loss.backward(retain_graph=True)
             optimizerD.step()
         else:
-            fake_out = Variable(torch.Tensor(1))
-            real_out = Variable(torch.Tensor(1))
+            if USE_CUDA:
+                fake_out = Variable(torch.cuda.FloatTensor(1))
+                real_out = Variable(torch.cuda.FloatTensor(1))
+            else:
+                fake_out = Variable(torch.FloatTensor(1))
+                real_out = Variable(torch.FloatTensor(1))
 
         ############################
         # (2) Update G network: minimize 1-D(G(z)) + Perception Loss + Image Loss
