@@ -20,15 +20,17 @@ echo "Downloaded VOC 2012 dataset"
 # get 
 echo "Downloading DIV2k dataset"
 wget http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip
-unzip http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip
+unzip DIV2K_train_HR.zip
 
-rm http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip
+rm DIV2K_train_HR.zip
 
 # Move data from DIV2k image folder to train
-mv DIV2K/DIV2K_train_HR/* data/train/.
+mv DIV2K_train_HR/* data/train/.
 
 # Delete downloaded data
 rm -rf DIV2K
 
 echo "Downloaded DIV2k dataset"
 
+# remove bad image
+rm data/train/2008_001823.jpg
