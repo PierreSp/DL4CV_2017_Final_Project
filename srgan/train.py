@@ -5,6 +5,7 @@ import datetime
 from math import log10
 
 import pandas as pd
+import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
 import torchvision.utils as utils
@@ -16,6 +17,7 @@ import pytorch_ssim
 from data_utils import TrainDatasetFromFolder, ValDatasetFromFolder, display_transform
 from loss import GeneratorLoss
 from model import Generator, Discriminator
+from dummy_model import DummyModel
 
 # special functionality for plots
 # WARNING NEEDS HUGE AMOUNT OF RESSOURCES AND MEMORY
@@ -50,13 +52,20 @@ def parse_args():
         '--no-cuda', action='store_true',
         help='override cuda and use cpu, even if cuda is available')
     parser.add_argument(
-        '--network', default="vgg19", type=str, help='Options: "vgg16" and "vgg19"')
+        '--network', default="vgg19", type=str,
+        help='Options: "vgg16", "vgg19", "vgg16vgg19"')
     parser.add_argument(
-        '--weight_perception', default=0.006, type=float, help='define the loss multiplicator for the perception')
+        '--weight_perception', default=0.006, type=float,
+        help='define the loss multiplicator for the perception')
     parser.add_argument(
-        '--weight_adversarial', default=0.001, type=float, help='define the loss multiplicator for the adv net')
+        '--weight_adversarial', default=0.001, type=float,
+        help='define the loss multiplicator for the adv net')
     parser.add_argument(
-        '--weight_image', default=1.0, type=float, help='define the loss multiplicator for the mse image loss')
+        '--weight_image', default=1.0, type=float,
+        help='define the loss multiplicator for the mse image loss')
+    parser.add_argument(
+        '--no-discriminator', action='store_true',
+        help='Completely disable the discriminator')
     return parser.parse_args()
 
 
@@ -74,12 +83,15 @@ VERBOSE = opt.verbose
 USE_CUDA = True if not opt.no_cuda and torch.cuda.is_available() else False
 NETWORK = opt.network
 WEIGHT_PERCEPTION = opt.weight_perception
-WEIGHT_ADVERSARIAL = opt.weight_adversarial
+WEIGHT_ADVERSARIAL = opt.weight_adversarial if not opt.no_discriminator else 0
 WEIGHT_IMAGE = opt.weight_image
+USE_DISCRIMINATOR = ~opt.no_discriminator
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
-# Ja format waere klueger gewesen :P
-FILENAMEEXT = str(TIMESTAMP) + "-" + str(NETWORK) + "-perc" + str(WEIGHT_PERCEPTION) + \
-    "-adv" + str(WEIGHT_ADVERSARIAL) + "-img" + str(WEIGHT_IMAGE)
+FILENAMEEXT = (
+    str(TIMESTAMP) + "-" + str(NETWORK) +
+    "-perc" + str(WEIGHT_PERCEPTION) +
+    "-adv" + str(WEIGHT_ADVERSARIAL) +
+    "-img" + str(WEIGHT_IMAGE))
 
 ####################
 ###    Logger    ###
@@ -115,7 +127,10 @@ val_loader = DataLoader(dataset=val_set, num_workers=4,
 netG = Generator(UPSCALE_FACTOR)
 print('# generator parameters:',
       sum(param.numel() for param in netG.parameters()))
-netD = Discriminator()
+if USE_DISCRIMINATOR:
+    netD = Discriminator()
+else:
+    netD = DummyModel()
 print('# discriminator parameters:',
       sum(param.numel() for param in netD.parameters()))
 
@@ -123,6 +138,10 @@ generator_criterion = GeneratorLoss(weight_perception=WEIGHT_PERCEPTION,
                                     weight_adversarial=WEIGHT_ADVERSARIAL, weight_image=WEIGHT_IMAGE, network=NETWORK)
 
 if USE_CUDA:
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        netG = torch.nn.DataParallel(netG)
+        netD = torch.nn.DataParallel(netD)
     netG.cuda()
     netD.cuda()
     generator_criterion.cuda()
