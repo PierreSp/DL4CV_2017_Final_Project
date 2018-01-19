@@ -281,11 +281,12 @@ for epoch in range(1, NUM_EPOCHS + 1):
     if not os.path.exists(weight_path):
         os.makedirs(weight_path)
     netG_filename = 'netG_epoch_{}.pth'.format(epoch)
-    netD_filename = 'netD_epoch_{}.pth'.format(epoch)
     netG_filepath = os.path.join(weight_path, netG_filename)
-    netD_filepath = os.path.join(weight_path, netD_filename)
     torch.save(netG.state_dict(), netG_filepath)
-    torch.save(netD.state_dict(), netD_filepath)
+    if USE_DISCRIMINATOR:
+        netD_filename = 'netD_epoch_{}.pth'.format(epoch)
+        netD_filepath = os.path.join(weight_path, netD_filename)
+        torch.save(netD.state_dict(), netD_filepath)
     # save loss\scores\psnr\ssim
     results['d_loss'].append(
         running_results['d_loss'] / running_results['batch_sizes'])
