@@ -65,7 +65,7 @@ def parse_args():
         '--no-discriminator', action='store_true',
         help='Completely disable the discriminator')
     parser.add_argument(
-        '--gpu-id', type=int, default=0
+        '--gpu-id', type=int, default=0,
         help='Define GPU to use')
     return parser.parse_args()
 
