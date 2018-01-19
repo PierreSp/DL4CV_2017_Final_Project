@@ -106,15 +106,19 @@ formatter = logging.Formatter(
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+if USE_CUDA:
+    NUM_GPU = torch.cuda.device_count()
+else:
+    NUM_GPU = 1
 
 # DataLoaders
 train_set = TrainDatasetFromFolder(
     'data/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
 val_set = ValDatasetFromFolder(
     'data/val', upscale_factor=UPSCALE_FACTOR)
-train_loader = DataLoader(dataset=train_set, num_workers=4,
+train_loader = DataLoader(dataset=train_set, num_workers=4*NUM_GPU,
                           batch_size=BATCH_SIZE_TRAIN, shuffle=True)
-val_loader = DataLoader(dataset=val_set, num_workers=4,
+val_loader = DataLoader(dataset=val_set, num_workers=4*NUM_GPU,
                         batch_size=1, shuffle=False)
 
 
@@ -200,7 +204,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
             if USE_DISCRIMINATOR:
                 fake_out = netD(fake_img).mean()
             else:
-                fake_out = 1                # Dummy value - Not used
+                fake_out =                 # Dummy value - Not used
             logger.debug("Fake-output_ mean: " + str(fake_out))
             logger.debug("Real out: " + str(real_out.data[0]))
             g_update_first = False
