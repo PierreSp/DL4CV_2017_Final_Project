@@ -19,7 +19,7 @@ parser.add_argument('--upscale_factor', default=4, type=int,
                     help='super resolution upscale factor')
 parser.add_argument('--model_name', default='netG_epoch_4_83.pth',
                     type=str, help='generator model epoch name')
-parser.add_argument('--folder', default='test',
+parser.add_argument('--folder', default='data/test',
                     type=str, help='define folder with test images')
 
 opt = parser.parse_args()
