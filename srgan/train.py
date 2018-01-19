@@ -64,6 +64,9 @@ def parse_args():
     parser.add_argument(
         '--no-discriminator', action='store_true',
         help='Completely disable the discriminator')
+    parser.add_argument(
+        '--gpu-id', type=int, default=0
+        help='Define GPU to use')
     return parser.parse_args()
 
 
@@ -83,6 +86,7 @@ NETWORK = opt.network
 WEIGHT_PERCEPTION = opt.weight_perception
 WEIGHT_ADVERSARIAL = opt.weight_adversarial if not opt.no_discriminator else 0
 WEIGHT_IMAGE = opt.weight_image
+GPU_ID = opt.gpu_di
 USE_DISCRIMINATOR = not opt.no_discriminator
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
 FILENAMEEXT = '{}_{}_perc{}_adv{}_img{}'.format(
@@ -116,9 +120,9 @@ train_set = TrainDatasetFromFolder(
     'data/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
 val_set = ValDatasetFromFolder(
     'data/val', upscale_factor=UPSCALE_FACTOR)
-train_loader = DataLoader(dataset=train_set, num_workers=4*NUM_GPU,
+train_loader = DataLoader(dataset=train_set, num_workers=4,
                           batch_size=BATCH_SIZE_TRAIN, shuffle=True)
-val_loader = DataLoader(dataset=val_set,
+val_loader = DataLoader(dataset=val_set, num_workers=4,
                         batch_size=1, shuffle=False)
 
 
@@ -135,19 +139,19 @@ generator_criterion = GeneratorLoss(weight_perception=WEIGHT_PERCEPTION,
                                     weight_adversarial=WEIGHT_ADVERSARIAL, weight_image=WEIGHT_IMAGE, network=NETWORK)
 
 if USE_CUDA:
-    if torch.cuda.device_count() > 1:
-        print("Let's use", torch.cuda.device_count(), "GPUs!")
-        netG = torch.nn.DataParallel(netG)
-        # netG = torch.nn.ModelDataParallel(
-        #     netG, device_ids=list(range(NUM_GPU)))
-        if USE_DISCRIMINATOR:
-            netD = torch.nn.DataParallel(netD)
-            # netD = torch.nn.ModelDataParallel(
-            #     netD, device_ids=list(range(NUM_GPU)))
-    netG.cuda()
+    # if torch.cuda.device_count() > 1:
+    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
+    #     netG = torch.nn.DataParallel(netG)
+    #     # netG = torch.nn.ModelDataParallel(
+    #     #     netG, device_ids=list(range(NUM_GPU)))
+    #     if USE_DISCRIMINATOR:
+    #         netD = torch.nn.DataParallel(netD)
+    #         # netD = torch.nn.ModelDataParallel(
+    #         #     netD, device_ids=list(range(NUM_GPU)))
+    netG.cuda(GPU_ID)
     if USE_DISCRIMINATOR:
-        netD.cuda()
-    generator_criterion.cuda()
+        netD.cuda(GPU_ID)
+    generator_criterion.cuda(GPU_ID)
 
 
 # Optimizer
@@ -161,8 +165,8 @@ results = {'d_loss': [], 'g_loss': [], 'd_score': [],
 
 # Actual training loop
 for epoch in range(1, NUM_EPOCHS + 1):
-    # train_bar = tqdm(train_loader)
-    train_bar = train_loader
+    train_bar = tqdm(train_loader)
+    # train_bar = train_loader
     running_results = {'batch_sizes': 0, 'd_loss': 0,
                        'g_loss': 0, 'd_score': 0, 'g_score': 0}
 
@@ -180,8 +184,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
         real_img = Variable(target)
         z = Variable(data)
         if USE_CUDA:
-            real_img = real_img.cuda()
-            z = z.cuda()
+            real_img = real_img.cuda(GPU_ID)
+            z = z.cuda(GPU_ID)
         fake_img = netG(z)
 
         if USE_DISCRIMINATOR:
@@ -225,13 +229,13 @@ for epoch in range(1, NUM_EPOCHS + 1):
         running_results['g_score'] += fake_out.data[0] * batch_size
 
         total_images_seen = running_results['batch_sizes']
-        # train_bar.set_description(
-        #     desc='[{}/{}] Loss_D: {:4f} Loss_G: {:4f} D(x): {:4f} D(G(z)): {:4f}'
-        #          .format(epoch, NUM_EPOCHS,
-        #                  running_results['d_loss'] / total_images_seen,
-        #                  running_results['g_loss'] / total_images_seen,
-        #                  running_results['d_score'] / total_images_seen,
-        #                  running_results['g_score'] / total_images_seen))
+        train_bar.set_description(
+            desc='[{}/{}] Loss_D: {:4f} Loss_G: {:4f} D(x): {:4f} D(G(z)): {:4f}'
+                 .format(epoch, NUM_EPOCHS,
+                         running_results['d_loss'] / total_images_seen,
+                         running_results['g_loss'] / total_images_seen,
+                         running_results['d_score'] / total_images_seen,
+                         running_results['g_score'] / total_images_seen))
 
     netG.eval()
     out_path = 'results/val/SRF_{}_{}/'.format(UPSCALE_FACTOR, FILENAMEEXT)
@@ -248,8 +252,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
         lr = Variable(val_lr, volatile=True)
         hr = Variable(val_hr, volatile=True)
         if USE_CUDA:
-            lr = lr.cuda()
-            hr = hr.cuda()
+            lr = lr.cuda(GPU_ID)
+            hr = hr.cuda(GPU_ID)
         sr = netG(lr)
 
         batch_mse = ((sr - hr) ** 2).data.mean()
