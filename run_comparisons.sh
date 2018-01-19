@@ -24,3 +24,5 @@ python -m srgan.train --batch_size 512 --network vgg16
 python -m srgan.train --batch_size 512 --network vgg19
 python -m srgan.train --batch_size 512 --network vgg16vgg19
 
+# 4. G_UPDATE_NUMBER = 1
+python -m srgan.train --batch_size 512 --g_update_number 1
