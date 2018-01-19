@@ -11,7 +11,7 @@ Related work: https://github.com/leftthomas/SRGAN.
 ## Setup
 1. Install pytorch as described on their [website](pytorch.org)
 2. `pip install -r requirements.txt`
-3. (Not done yet) Execute the setup script to download the VOC2012 data and partition them into train test and validation sets
+3. Execute the setup script to download the VOC2012 and DIV2k data and partition them into train test and validation sets
 
 ## Usage
 - Load images to *data/val* and *data/train* folder
@@ -20,3 +20,4 @@ Related work: https://github.com/leftthomas/SRGAN.
 - Find statics (PSNR, SSIM,...) in *logs/statistics*
 - The weights will be saved in *log/epochs/*
 - For testing load files to the *data/test* folder and run '''test.py''' with the trained weights as parameter
+- After several runs run the cleanupscript to remove half of all validation pictures and weights
