@@ -137,13 +137,13 @@ generator_criterion = GeneratorLoss(weight_perception=WEIGHT_PERCEPTION,
 if USE_CUDA:
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
-        # netG = torch.nn.DataParallel(netG)
-        netG = torch.nn.ModelDataParallel(
-            netG, device_ids=list(range(NUM_GPU)))
+        netG = torch.nn.DataParallel(netG)
+        # netG = torch.nn.ModelDataParallel(
+        #     netG, device_ids=list(range(NUM_GPU)))
         if USE_DISCRIMINATOR:
-            # netD = torch.nn.DataParallel(netD)
-            netD = torch.nn.ModelDataParallel(
-                netD, device_ids=list(range(NUM_GPU)))
+            netD = torch.nn.DataParallel(netD)
+            # netD = torch.nn.ModelDataParallel(
+            #     netD, device_ids=list(range(NUM_GPU)))
     netG.cuda()
     if USE_DISCRIMINATOR:
         netD.cuda()
