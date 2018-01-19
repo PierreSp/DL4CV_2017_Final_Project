@@ -187,8 +187,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
             d_loss.backward(retain_graph=True)
             optimizerD.step()
         else:
-            fake_out = 1
-            real_out = 1
+            fake_out = Variable(torch.Tensor(1))
+            real_out = Variable(torch.Tensor(1))
 
         ############################
         # (2) Update G network: minimize 1-D(G(z)) + Perception Loss + Image Loss
@@ -203,8 +203,6 @@ for epoch in range(1, NUM_EPOCHS + 1):
             fake_img = netG(z)
             if USE_DISCRIMINATOR:
                 fake_out = netD(fake_img).mean()
-            else:
-                fake_out =                 # Dummy value - Not used
             logger.debug("Fake-output_ mean: " + str(fake_out))
             logger.debug("Real out: " + str(real_out.data[0]))
             g_update_first = False
