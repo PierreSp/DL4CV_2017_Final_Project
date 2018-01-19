@@ -9,6 +9,7 @@ class GeneratorLoss(nn.Module):
     def __init__(self, weight_perception=0.006, weight_adversarial=0.001,
                  weight_image=1, network="vgg16"):
         super(GeneratorLoss, self).__init__()
+        self.network = network
         self.weight_image = weight_image
         self.weight_adversarial = weight_adversarial
         self.weight_perception = weight_perception
@@ -24,6 +25,17 @@ class GeneratorLoss(nn.Module):
             pretrained_net = resnet101(pretrained=True)
             loss_network = nn.Sequential(
                 *list(pretrained_net.classifier.children())[:-1]).eval()
+        elif network == "vgg16vgg19":
+            pretrained_net_vgg16 = vgg16(pretrained=True)
+            loss_network = nn.Sequential(
+                *list(pretrained_net_vgg16.features)[:31]).eval()
+            pretrained_net_vgg19 = vgg19(pretrained=True)
+            loss_network_vgg19 = nn.Sequential(
+                *list(pretrained_net_vgg19.features)[:27]).eval()
+            for param in loss_network_vgg19.parameters():
+                param.requires_grad = False
+            self.loss_network_vgg19 = loss_network_vgg19
+
         for param in loss_network.parameters():
             param.requires_grad = False
         self.loss_network = loss_network
@@ -33,8 +45,13 @@ class GeneratorLoss(nn.Module):
         # Adversarial Loss
         adversarial_loss = torch.mean(1 - out_error)
         # Perception Loss
-        perception_loss = self.mse_loss(self.loss_network(
-            out_images), self.loss_network(target_images))
+        if self.network == "vgg16vgg19":
+            perception_loss = (self.mse_loss(self.loss_network(
+                out_images), self.loss_network(target_images)) + self.mse_loss(self.loss_network_vgg19(
+                    out_images), self.loss_network_vgg19(target_images))) / 2
+        else:
+            perception_loss = self.mse_loss(self.loss_network(
+                out_images), self.loss_network(target_images))
         # Image Loss
         image_loss = self.mse_loss(out_images, target_images)
         return self.weight_image * image_loss + self.weight_adversarial * adversarial_loss + self.weight_perception * perception_loss
