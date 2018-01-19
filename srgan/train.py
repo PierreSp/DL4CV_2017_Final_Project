@@ -116,7 +116,7 @@ train_set = TrainDatasetFromFolder(
     'data/train', crop_size=CROP_SIZE, upscale_factor=UPSCALE_FACTOR)
 val_set = ValDatasetFromFolder(
     'data/val', upscale_factor=UPSCALE_FACTOR)
-train_loader = DataLoader(dataset=train_set, num_workers=4*NUM_GPU,
+train_loader = DataLoader(dataset=train_set,
                           batch_size=BATCH_SIZE_TRAIN, shuffle=True)
 val_loader = DataLoader(dataset=val_set,
                         batch_size=1, shuffle=False)
