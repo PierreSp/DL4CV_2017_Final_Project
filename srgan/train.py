@@ -184,6 +184,7 @@ for epoch in range(1, NUM_EPOCHS + 1):
             optimizerD.step()
         else:
             fake_out = 1
+            real_out = 1
 
         ############################
         # (2) Update G network: minimize 1-D(G(z)) + Perception Loss + Image Loss
