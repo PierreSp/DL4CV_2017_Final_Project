@@ -85,7 +85,7 @@ NETWORK = opt.network
 WEIGHT_PERCEPTION = opt.weight_perception
 WEIGHT_ADVERSARIAL = opt.weight_adversarial if not opt.no_discriminator else 0
 WEIGHT_IMAGE = opt.weight_image
-USE_DISCRIMINATOR = ~opt.no_discriminator
+USE_DISCRIMINATOR = not opt.no_discriminator
 TIMESTAMP = datetime.datetime.now().strftime('%Y%m%d_%h%M%s')
 FILENAMEEXT = '{}_{}_perc{}_adv{}_img{}'.format(
     TIMESTAMP, NETWORK, WEIGHT_PERCEPTION, WEIGHT_ADVERSARIAL, WEIGHT_IMAGE)
