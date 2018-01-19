@@ -5,7 +5,6 @@ import datetime
 from math import log10
 
 import pandas as pd
-import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
 import torchvision.utils as utils
@@ -17,7 +16,6 @@ import pytorch_ssim
 from data_utils import TrainDatasetFromFolder, ValDatasetFromFolder, display_transform
 from loss import GeneratorLoss
 from model import Generator, Discriminator
-from dummy_model import DummyModel
 
 # special functionality for plots
 # WARNING NEEDS HUGE AMOUNT OF RESSOURCES AND MEMORY
@@ -126,10 +124,8 @@ print('# generator parameters:',
       sum(param.numel() for param in netG.parameters()))
 if USE_DISCRIMINATOR:
     netD = Discriminator()
-else:
-    netD = DummyModel()
-print('# discriminator parameters:',
-      sum(param.numel() for param in netD.parameters()))
+    print('# discriminator parameters:',
+          sum(param.numel() for param in netD.parameters()))
 
 generator_criterion = GeneratorLoss(weight_perception=WEIGHT_PERCEPTION,
                                     weight_adversarial=WEIGHT_ADVERSARIAL, weight_image=WEIGHT_IMAGE, network=NETWORK)
@@ -138,15 +134,18 @@ if USE_CUDA:
     if torch.cuda.device_count() > 1:
         print("Let's use", torch.cuda.device_count(), "GPUs!")
         netG = torch.nn.DataParallel(netG)
-        netD = torch.nn.DataParallel(netD)
+        if USE_DISCRIMINATOR:
+            netD = torch.nn.DataParallel(netD)
     netG.cuda()
-    netD.cuda()
+    if USE_DISCRIMINATOR:
+        netD.cuda()
     generator_criterion.cuda()
 
 
 # Optimizer
 optimizerG = optim.Adam(netG.parameters())
-optimizerD = optim.Adam(netD.parameters())
+if USE_DISCRIMINATOR:
+    optimizerD = optim.Adam(netD.parameters())
 
 results = {'d_loss': [], 'g_loss': [], 'd_score': [],
            'g_score': [], 'psnr': [], 'ssim': []}
@@ -159,7 +158,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
                        'g_loss': 0, 'd_score': 0, 'g_score': 0}
 
     netG.train()
-    netD.train()
+    if USE_DISCRIMINATOR:
+        netD.train()
     for data, target in train_bar:
         g_update_first = True
         batch_size = data.size(0)                       # CURRENT batch size
@@ -175,12 +175,15 @@ for epoch in range(1, NUM_EPOCHS + 1):
             z = z.cuda()
         fake_img = netG(z)
 
-        netD.zero_grad()
-        real_out = netD(real_img).mean()
-        fake_out = netD(fake_img).mean()
-        d_loss = 1 - real_out + fake_out
-        d_loss.backward(retain_graph=True)
-        optimizerD.step()
+        if USE_DISCRIMINATOR:
+            netD.zero_grad()
+            real_out = netD(real_img).mean()
+            fake_out = netD(fake_img).mean()
+            d_loss = 1 - real_out + fake_out
+            d_loss.backward(retain_graph=True)
+            optimizerD.step()
+        else:
+            fake_out = 1
 
         ############################
         # (2) Update G network: minimize 1-D(G(z)) + Perception Loss + Image Loss
@@ -193,7 +196,10 @@ for epoch in range(1, NUM_EPOCHS + 1):
             g_loss.backward()
             optimizerG.step()
             fake_img = netG(z)
-            fake_out = netD(fake_img).mean()
+            if USE_DISCRIMINATOR:
+                fake_out = netD(fake_img).mean()
+            else:
+                fake_out = 1                # Dummy value - Not used
             logger.debug("Fake-output_ mean: " + str(fake_out))
             logger.debug("Real out: " + str(real_out.data[0]))
             g_update_first = False
