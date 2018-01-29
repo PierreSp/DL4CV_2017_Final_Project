@@ -2,13 +2,29 @@
 \tikzposterlatexaffectionproofoff
 
 % support for LuaTeX => striclty better
+%
+% most things stated for LuaTeX also apply for XeTeX, but XeTeX is not
+% very useful now, since LuaTeX is widely available
 \usepackage{ifluatex}
 \ifluatex
-% do nothing
+% use the CI font of TUM
+% download from mytum portal (search for TUM CI/CD stuff)
+% the scaling is the default from TUM templates
+\usepackage{fontspec}
+\setsansfont{TUM Neue Helvetica}[Scale=0.95]
+\setmainfont{TUM Neue Helvetica}[Scale=0.95] % use TUM font (not a nice one)
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
 \else
-% only needed for TeX Enginge, does not work with LuaTeX
-\usepackage[utf8]{inputenc}
+% only needed for oldschool TeX Enginge
+\usepackage[utf8]{inputenc}     % does not work with LuaTeX
+\usepackage[english]{babel}     % does not work well with LuaTeX
 \fi
+
+\usepackage[final]{microtype}   % improve typography, e.g. kerning
+\usepackage{ellipsis}            % for proper ...
+
+
 
 
 \usepackage{authblk}
@@ -87,12 +103,15 @@
 \colorlet{backgroundcolor}{white}
 
 % title matter
-\title{DL4CV Project}
+\title{Image Super--Resolution with GANs}
 
 \author[1]{Nathanael Bosch}
 \author[1]{Thomas Grassinger}
 \author[1]{Jonas Kipfstuhl}
 \author[1]{Pierre Springer}
+
+% remove the ugly 'and' before last author, as a benefit Pierre is in line again
+\renewcommand{\Authands}{, }
 
 \affil[1]{Technical University of Munich}
 
@@ -105,13 +124,27 @@
 \maketitle
 
 \begin{columns}
-    \column{0.5}
-    \block{First column first block}{Content in your block.}
-    \block{First column second block}{Content in your block.}
+  \column{0.5}
 
-    \column{0.5}
-    \block{Second column first block}{Content in your block.}
-    \block{Second column second block}{Content in your block.}
+  \block{Introduction}{%
+    Some sentences about the whole project
+  }
+  
+  \block{GANs}{%
+    Maybe a picture to illustrate the idea of GANs.
+  }
+
+
+  \column{0.5}
+  
+  \block{Statistics}{%
+    Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
+  }
+
+  \block{Results}{%
+    Some sample images, low resultion, upsampled by our net(s), original high resolution.
+  }
+  
 \end{columns}
 
 \end{document}
