@@ -1,0 +1,170 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+% \usepackage{times}
+
+\usepackage{tgbonum}
+% if we need a smaller font, i.e. narrower then
+% \usepackage{tgtermes}
+
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Super-Resolution with GANs}
+
+\author{Nathanael Bosch\\
+{\tt\small nathanael.bosch@tum.de}
+\and
+Thomas Grassinger\\
+{\tt\small thomas.grassinger@tum.de}
+\and
+Jonas Kipfstuhl\\
+{\tt\small jonas.kipfstuhl@tum.de}
+\and
+Pierre Springer\\
+{\tt\small pierre.springer@tum.de}
+%\and
+%Team Member 5\\
+%{\tt\small fifth@i1.org}
+}
+
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%
+% Text of the proposal
+% this may be reused in parts.
+%
+% \section{Introduction} The goal of this project is to gain a deeper
+% understanding of Generative Adversarial Networks. We will then apply
+% them to the image super resolution problem.  %and try different
+% applications, so we probably won't invent new applications or methods
+% for GANs, but will try different architectures, loss functions and
+% applications for GANs (see \cite{Overview}).  %Depending on the
+% conflicts with the data acquisition, server problems and the time it
+% takes to understand GANs, we want to use the structure of the network
+% to work on different problems.  %As there are more than 250 papers
+% about GANs in arXiv, we collected a small set of interesting topics
+% (see \ref{rel_work}) which we will consider in our work.
+
+
+%     \subsection{Related Works}
+%     \label{rel_work}
+%         \begin{itemize}
+%         \item Generative Adversarial Networks \cite{Goodfellow2014}
+%         \item Generative Adversarial Networks: An Overview
+% \cite{Overview}
+%         %\item Learning to Discover Cross-Domain Relations with
+% Generative Adversarial Networks \cite{Kim2017}
+%         %\item SegAN: Adversarial Network with Multi-scale L1 Loss for
+% Medical Image Segmentation \cite{Kim2017}
+%         \item Photo-Realistic Single Image Super-Resolution Using a
+% Generative Adversarial Network \cite{SuperRes}
+%         %\item Anti-Makeup: Learning A Bi-Level Adversarial Network
+% for Makeup-Invariant Face Verification \cite{MakeUpGAN}
+%         \end{itemize}
+
+% As we did not get responses for all datasets, for now, we decided to
+% work on the Photo-Realistic Single Image Super-Resolution using a
+% Generative Adversarial Network \cite{SuperRes} paper. The main goal is
+% to learn how to increase the resolution of images up to 4 times, while
+% still creating \emph{good} images that look realistic. This is
+% achieved by training Generative Adversarial Networks on downscaled
+% versions of high resolution images. The \emph{generator} part of the
+% GAN will do the actual task of super-resolution, while the
+% \emph{discriminator} is trained to distinguish between real images and
+% super-resolved images. We will compare the results of this approach to
+% regular methods, such as bicubic extrapolation. The work will be
+% mostly based on \cite{SuperRes}.
+
+% \section{Dataset} Our initial work towards \emph{understanding GANs}
+% will use the MNIST and CIFAR-10 datasets, which we already worked with
+% in the lecture and exercises. We will not give detailed explanation to
+% these datasets.  %We already contacted the staff of the Multimodal
+% Brain Tumor Segmentation Challenge to get the brain tumor images but
+% did not get a response yet.
+
+% For the Image Super-Resolution \cite{SuperRes} we will work with the
+% DIV2k dataset \cite{Agustsson_2017_CVPR_Workshops}.  The dataset
+% consists of 1000 2K resolution images divided into: 800 images for
+% training, 100 images for validation, 100 images for testing. As we do
+% not have access to the 100 high resolution test images we will only
+% use the 800+100 images provided, and split into train-validation-test
+% accordingly.  The images are provided in both high and low resolution
+% images for 2, 3, and 4 downscaling factors.  The structure of the
+% given images is \cite{Agustsson_2017_CVPR_Workshops}:
+
+% \begin{quote} For the high resolution images: 0001.png, 0002.png, ...,
+% 1000.png\\ \\ For the downscaled images:\\ YYYYx2.png for downscaling
+% factor x2; where YYYY is the image ID\\ YYYYx3.png for downscaling
+% factor x3; where YYYY is the image ID\\ YYYYx4.png for downscaling
+% factor x4; where YYYY is the image ID
+% \end{quote} We also have access to the ImageNet data but will most
+% likely use a pretrained network to make use of its features such as
+% the VGG network \cite{VGG}, which is already available within
+% torchvision. Detailed information about ImageNet can be found in
+% \cite{imagenet_cvpr09}.
+
+% \section{Methodology} Our initial work will setup on the cs241 course,
+% which treated the basics of GANs and followed the work of
+% \cite{Goodfellow2014}. In this stage, we want to understand what GANs
+% are and how they work, as well as why people use them and which
+% problems they were meant to solve. The cs241 course provides practical
+% guidelines for initial implementations, but also allows us to modify
+% the results and explore the many possibilities. We will start working
+% with the MNIST and CIFAR-10 dataset by applying and comparing
+% different GAN models such as fully connected GAN networks, convolution
+% GAN networks, conditional CNN, and Adversarial Autoencoders to get a
+% understanding of Generative Adversarial Networks.
+
+% In a second step, after having understood the principles of GANs, we
+% will reproduce the results of the super-resolution paper
+% \cite{SuperRes} and try different modifications. These modifications
+% include for example, changing the input features or choosing other
+% pretrained models, such as different VGG layer models or even an
+% entirely different model e.g.\,, AlexNet. Using our knowledge from the
+% initial work on the MNIST and CIFAR data, we might also find other
+% ways to improve our models performance compared to that of the
+% paper. These tasks (working on layers, data engineering, work on
+% pretrained models, further research) can be easily split up, which
+% provides an efficient workflow.
+
+% We would like to use the Google cloud service as presented in the
+% lecture, but the local possibilities of the computer vision group
+% might also be sufficient.  %If time permits we would like to dive
+% deeper into other papers presented in \ref{rel_work}, and then
+% implement and train such a more advanced GAN.
+
+% \section{Outcome} Our target still remains: We want to
+% \textit{understand} GANs!\\ Additionally we want to create a GAN which
+% is able to transform low-resolution images into higher resolutions
+% with similar or even better results as \cite{SuperRes}.
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{bib}
+
+}
+
+\end{document}
