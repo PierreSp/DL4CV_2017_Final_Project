@@ -17,7 +17,7 @@ from model import Generator
 parser = argparse.ArgumentParser(description='Test Datasets')
 parser.add_argument('--upscale_factor', default=4, type=int,
                     help='super resolution upscale factor')
-parser.add_argument('--model_name', default='netG_epoch_4_83.pth',
+parser.add_argument('--model_name', default='netG_epoch_80.pth',
                     type=str, help='generator model epoch name')
 parser.add_argument('--folder', default='data/test',
                     type=str, help='define folder with test images')
@@ -31,12 +31,12 @@ FOLDERNAME = opt.folder
 results = {'psnr': [], 'ssim': []}
 
 model = Generator(UPSCALE_FACTOR).eval()
-if torch.cuda.is_available():
-    model = model.cuda()
-model.load_state_dict(torch.load('logs/epochs/' + MODEL_NAME))
+# if torch.cuda.is_available():
+#    model = model.cuda()
+model.load_state_dict(torch.load('logs/epochs/' + MODEL_NAME, map_location=lambda storage, loc:storage))
 
 test_set = TestDatasetFromFolderPierre(
-    'data/' + str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
+     str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
 test_loader = DataLoader(dataset=test_set, num_workers=4,
                          batch_size=1, shuffle=False)
 test_bar = tqdm(test_loader, desc='[testing datasets]')
@@ -49,9 +49,9 @@ for image_name, lr_image, hr_restore_img, hr_image in test_bar:
     image_name = image_name[0]
     lr_image = Variable(lr_image, volatile=True)
     hr_image = Variable(hr_image, volatile=True)
-    if torch.cuda.is_available():
-        lr_image = lr_image.cuda()
-        hr_image = hr_image.cuda()
+    # if torch.cuda.is_available():
+     #   lr_image = lr_image.cuda()
+     #   hr_image = hr_image.cuda()
 
     sr_image = model(lr_image)
     mse = ((hr_image - sr_image) ** 2).data.mean()
