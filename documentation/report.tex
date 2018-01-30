@@ -3,9 +3,10 @@
 \usepackage{cvpr}
 % \usepackage{times}
 
-\usepackage{tgbonum}
+\usepackage{tgbonum} % TeX Gyre Bonum
 % if we need a smaller font, i.e. narrower then
-% \usepackage{tgtermes}
+% \usepackage{tgtermes} % TeX Gyre Termes
+% for other fonts need LuaTeX (or at least XeTeX)
 
 \usepackage{epsfig}
 \usepackage{graphicx}
@@ -51,6 +52,54 @@ Pierre Springer\\
 
 \maketitle
 %\thispagestyle{empty}
+
+\section{Introduction}
+\label{sec:intro}
+
+% The idea and problem statement
+
+\section{Setup}
+\label{sec:setup}
+
+% what we used for our work
+
+\subsection{Dataset}
+\label{sec:data}
+
+% our datasets
+
+\subsection{Networks}
+\label{sec:nets}
+
+% the Networks, e.g. VGG16, VGG19, VGG16/19
+
+\section{Results}
+\label{sec:results}
+
+% our results => main section
+% discriminatro may be omitted
+% better nets work better
+% ...
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+% something about what we learned
+
+\appendix
+%%% Appendix
+% include images
+% include graphs
+
+{
+  \nocite{*}                      % also those references without \cite{·}
+  \small
+  \bibliographystyle{ieee}
+  \bibliography{bib}
+  
+}
+
+
 
 %%%%%%
 % Text of the proposal
@@ -161,10 +210,5 @@ Pierre Springer\\
 % is able to transform low-resolution images into higher resolutions
 % with similar or even better results as \cite{SuperRes}.
 
-{\small
-\bibliographystyle{ieee}
-\bibliography{bib}
-
-}
 
 \end{document}
