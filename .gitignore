@@ -2,6 +2,7 @@
 data/
 results/
 logs/
+plots/
 
 ###############################################################################
 # Byte-compiled / optimized / DLL files
