@@ -36,6 +36,7 @@ for f in STAT_FILENAMES:
     fig = plt.figure()
 
     ax = fig.add_subplot(211)
+    ax.set(xlabel="Epoch")
     df.plot(
         y='Loss_G',
         title='Training Losses',
@@ -47,6 +48,7 @@ for f in STAT_FILENAMES:
             ax=ax)
 
     ax = fig.add_subplot(212)
+    ax.set(xlabel="Epoch")
     df.plot(
         ax=ax,
         y='PSNR',
