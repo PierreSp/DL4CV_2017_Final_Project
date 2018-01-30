@@ -11,8 +11,9 @@
 % download from mytum portal (search for TUM CI/CD stuff)
 % the scaling is the default from TUM templates
 \usepackage{fontspec}
-\setsansfont{TUM Neue Helvetica}[Scale=0.95]
-\setmainfont{TUM Neue Helvetica}[Scale=0.95] % use TUM font (not a nice one)
+%\setsansfont{TUM Neue Helvetica}[Scale=0.95]
+%\setmainfont{TUM Neue Helvetica}[Scale=0.95] % use TUM font (not a nice one)
+\setmainfont{Dosis}
 \usepackage{polyglossia}
 \setdefaultlanguage{english}
 \else
@@ -97,6 +98,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+% graphics
+\graphicspath{{../logs/results/}}
+
 % color handling
 \definecolor{TumBlue}{cmyk}{1,0.43,0,0}
 \colorlet{blocktitlebgcolor}{TumBlue}
@@ -124,7 +128,7 @@
 \maketitle
 
 \begin{columns}
-  \column{0.5}
+  \column{0.4}
 
   \block{Introduction}{%
     Some sentences about the whole project
@@ -135,14 +139,17 @@
   }
 
 
-  \column{0.5}
+  \column{0.3}
   
   \block{Statistics}{%
-    Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
+    % \includegraphics[width=\linewidth]{}
+    % Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
   }
 
+  \column{0.3}
   \block{Results}{%
-    Some sample images, low resultion, upsampled by our net(s), original high resolution.
+    
+    % Some sample images, low resultion, upsampled by our net(s), original high resolution.
   }
   
 \end{columns}
