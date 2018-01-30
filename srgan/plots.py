@@ -1,3 +1,15 @@
+"""Notes on the different columns of the csv files
+
+PSNR: Peak Signal-to-Noise Ratio
+SSIM: Structural Similarity
+
+Loss_D: Discriminator Loss; Used to train Discriminator
+Loss_G: Generator Loss; Used to train Discriminator; Composed of img perception and disc Loss
+
+Score_D: Discriminator score given to the real image
+Score_G: Discriminator score given to the fake image
+"""
+
 import os
 
 import pandas as pd
