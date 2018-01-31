@@ -21,3 +21,4 @@ Related work: https://github.com/leftthomas/SRGAN.
 - The weights will be saved in *log/epochs/*
 - For testing load files to the *data/test* folder and run '''test.py''' with the trained weights as parameter
 - After several runs run the cleanupscript to remove half of all validation pictures and weights
+- Run *python srgan/use_webcam.py* to use the network for generating sr pictures from webcam pictures. Press space for generation and closing the transformed image window. Escape for closing the program 
