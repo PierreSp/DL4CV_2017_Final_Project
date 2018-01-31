@@ -30,6 +30,7 @@ while True:
         img_name = "live_srgan_{}.png".format(img_counter)
         img_in_path = os.path.join(PATH_INPUT, img_name)
         cv2.imwrite(img_name, frame)
+        os.system("python srgan/run_test --folder " + str(PATH_INPUT))
         print("{} written!".format(img_name))
         img_counter += 1
 

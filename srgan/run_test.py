@@ -21,12 +21,18 @@ parser.add_argument('--model_name', default='netG_epoch_80.pth',
                     type=str, help='generator model epoch name')
 parser.add_argument('--folder', default='data/test',
                     type=str, help='define folder with test images')
+parser.add_argument('--outfolder', default='results/test/SRF_',
+                    type=str, help='define folder for result images')
 
 opt = parser.parse_args()
 
 UPSCALE_FACTOR = opt.upscale_factor
 MODEL_NAME = opt.model_name
 FOLDERNAME = opt.folder
+
+OUT_PATH = opt.outfolder + str(UPSCALE_FACTOR) + '/'
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
 
 results = {'psnr': [], 'ssim': []}
 
@@ -40,10 +46,6 @@ test_set = TestDatasetFromFolderPierre(
 test_loader = DataLoader(dataset=test_set, num_workers=4,
                          batch_size=1, shuffle=False)
 test_bar = tqdm(test_loader, desc='[testing datasets]')
-
-out_path = 'results/test/SRF_' + str(UPSCALE_FACTOR) + '/'
-if not os.path.exists(out_path):
-    os.makedirs(out_path)
 
 for image_name, lr_image, hr_restore_img, hr_image in test_bar:
     image_name = image_name[0]
@@ -62,8 +64,7 @@ for image_name, lr_image, hr_restore_img, hr_image in test_bar:
         [display_transform()(hr_restore_img.squeeze(0)), display_transform()(hr_image.data.cpu().squeeze(0)),
          display_transform()(sr_image.data.cpu().squeeze(0))])
     image = utils.make_grid(test_images, nrow=3, padding=5)
-    utils.save_image(image, out_path + image_name.split('.')[0] + '_psnr_%.4f_ssim_%.4f.' % (psnr, ssim) +
-                     image_name.split('.')[-1], padding=5)
+    utils.save_image(image, OUT_PATH + image_name, padding=5)
 
     # save psnr\ssim
     results['psnr'].append(psnr)
