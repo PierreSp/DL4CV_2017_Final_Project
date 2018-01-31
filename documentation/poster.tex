@@ -41,9 +41,57 @@
 \usepackage[colalign]{column_aligned}
 
 % tikzposter meta settings
-\usetheme{Default}
-\usetitlestyle{Default}
-\useblockstyle{Default}
+% \usetheme{Default}
+% \usetitlestyle{Default}
+% \useblockstyle{Default}
+\usetheme{Simple}
+
+\definetitlestyle{Team9Title}{
+    width=600mm, roundedcorners=30, linewidth=0.4cm, innersep=1cm,
+    titletotopverticalspace=15mm, titletoblockverticalspace=20mm,
+    titlegraphictotitledistance=10pt, titletextscale=1
+}{
+    \begin{scope}[line width=\titlelinewidth, rounded corners=\titleroundedcorners]
+        \draw[draw=none, fill=titlebgcolor]%
+        (\titleposleft,\titleposbottom) rectangle (\titleposright,\titlepostop);
+    \end{scope}
+}
+
+\usetitlestyle{Team9Title}
+
+
+\defineblockstyle{Team9Blocks}{
+    titlewidthscale=1, bodywidthscale=1, titleleft,
+    titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0pt, bodyoffsety=0pt,
+    bodyverticalshift=0pt, roundedcorners=0, linewidth=0.2cm,
+    titleinnersep=1cm, bodyinnersep=1cm
+}{
+    \begin{scope}[line width=\blocklinewidth, rounded corners=\blockroundedcorners]
+      % \draw[draw=framecolor]%, fill=blockbodybgcolor]
+      % (blockbody.south west) rectangle (blocktitle.north east);      
+      \draw[draw=framecolor]
+        (blockbody.south west) rectangle (blockbody.north east);
+      \ifBlockHasTitle %
+           \draw[color=blocktitlebgcolor]
+               (blocktitle.south west) -- (blocktitle.south east);%
+       \else
+        \fi
+    \end{scope}
+}
+
+\useblockstyle{Team9Blocks}
+
+% color handling
+\definecolor{TumBlue}{cmyk}{1,0.43,0,0}
+\colorlet{blocktitlebgcolor}{TumBlue!50}
+\colorlet{blocktitlefgcolor}{TumBlue}
+\colorlet{blockbodybgcolor}{TumBlue!50}
+\colorlet{framecolor}{TumBlue!50}
+\colorlet{backgroundcolor}{white}
+
+\colorlet{titlebgcolor}{TumBlue}
+%\colorlet{titlebgcolor}{}
+
 
 %%%%%%%%%%% redefine title matter to include one logo on each side of the title; adjust with \LogoSep
 \makeatletter
@@ -99,10 +147,6 @@
 % graphics
 \graphicspath{{../logs/results/}}
 
-% color handling
-\definecolor{TumBlue}{cmyk}{1,0.43,0,0}
-\colorlet{blocktitlebgcolor}{TumBlue}
-\colorlet{backgroundcolor}{white}
 
 % title matter
 \title{Image Super--Resolution with GANs}
