@@ -29,7 +29,6 @@ opt = parser.parse_args()
 UPSCALE_FACTOR = opt.upscale_factor
 MODEL_NAME = opt.model_name
 FOLDERNAME = opt.folder
-
 OUT_PATH = opt.outfolder + str(UPSCALE_FACTOR) + '/'
 if not os.path.exists(OUT_PATH):
     os.makedirs(OUT_PATH)

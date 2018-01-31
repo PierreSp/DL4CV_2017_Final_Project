@@ -1,10 +1,30 @@
 import cv2
 import os
-import time
-from matplotlib import pyplot as plt
+import torch
+import torchvision.utils as utils
+
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+
+from data_utils import TestDatasetFromFolderPierre, display_transform
+from model import Generator
 
 PATH_INPUT = "data/live/input/"
 PATH_OUTPUT = "data/live/output/"
+UPSCALE_FACTOR = 4
+MODEL_NAME = "netG_epoch_80.pth"
+FOLDERNAME = PATH_INPUT
+OUT_PATH = PATH_OUTPUT + str(UPSCALE_FACTOR) + '/'
+if not os.path.exists(OUT_PATH):
+    os.makedirs(OUT_PATH)
+
+model = Generator(UPSCALE_FACTOR).eval()
+# if torch.cuda.is_available():
+#    model = model.cuda()
+model.load_state_dict(torch.load('logs/epochs/' + MODEL_NAME,
+                                 map_location=lambda storage, loc: storage))
 
 if not os.path.exists(PATH_INPUT):
     os.makedirs(PATH_INPUT)
@@ -33,8 +53,22 @@ while True:
         img_in_path = os.path.join(PATH_INPUT, img_name)
         cv2.imwrite(img_in_path, frame)
         print("{} written!".format(img_name))
-        os.system("python srgan/run_test.py --folder " + str(PATH_INPUT) + " --outfolder " + str(PATH_OUTPUT))
-        time.sleep(2)
+        test_set = TestDatasetFromFolderPierre(
+            str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
+        test_loader = DataLoader(dataset=test_set, num_workers=4,
+                                 batch_size=1, shuffle=False)
+        test_bar = tqdm(test_loader, desc='[testing datasets]')
+
+        for image_name, lr_image, hr_restore_img, hr_image in test_bar:
+            image_name = image_name[0]
+            lr_image = Variable(lr_image, volatile=True)
+            hr_image = Variable(hr_image, volatile=True)
+            sr_image = model(lr_image)
+            test_images = torch.stack(
+                [display_transform()(hr_restore_img.squeeze(0)), display_transform()(hr_image.data.cpu().squeeze(0)),
+                 display_transform()(sr_image.data.cpu().squeeze(0))])
+            image = utils.make_grid(test_images, nrow=3, padding=5)
+            utils.save_image(image, OUT_PATH + image_name, padding=5)
         os.remove(img_in_path)
         print("{} deleted!".format(img_name))
         img_out_path = os.path.join(PATH_OUTPUT + "4/", img_name)
