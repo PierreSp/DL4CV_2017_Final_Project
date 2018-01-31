@@ -11,8 +11,9 @@
 % download from mytum portal (search for TUM CI/CD stuff)
 % the scaling is the default from TUM templates
 \usepackage{fontspec}
-\setsansfont{TUM Neue Helvetica}[Scale=0.95]
-\setmainfont{TUM Neue Helvetica}[Scale=0.95] % use TUM font (not a nice one)
+%\setsansfont{TUM Neue Helvetica}[Scale=0.95]
+%\setmainfont{TUM Neue Helvetica}[Scale=0.95] % use TUM font (not a nice one)
+\setmainfont{Dosis}
 \usepackage{polyglossia}
 \setdefaultlanguage{english}
 \else
@@ -22,8 +23,6 @@
 \fi
 
 \usepackage[final]{microtype}   % improve typography, e.g. kerning
-\usepackage{ellipsis}            % for proper ...
-
 
 
 
@@ -97,6 +96,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+% graphics
+\graphicspath{{../logs/results/}}
+
 % color handling
 \definecolor{TumBlue}{cmyk}{1,0.43,0,0}
 \colorlet{blocktitlebgcolor}{TumBlue}
@@ -113,10 +115,15 @@
 % remove the ugly 'and' before last author, as a benefit Pierre is in line again
 \renewcommand{\Authands}{, }
 
+% define a length for the heigt of the images
+\newlength{\imageheight}
+\setlength{\imageheight}{16cm}
+
 \affil[1]{Technical University of Munich}
 
 \insertlogoi[width=15cm]{tum_logo}
 \insertlogoii[width=15cm]{tum_logo}
+
 
 % main document
 \begin{document}
@@ -124,7 +131,9 @@
 \maketitle
 
 \begin{columns}
-  \column{0.5}
+  
+  % Introduction and explanation of GANs
+  \column{0.4}
 
   \block{Introduction}{%
     Some sentences about the whole project
@@ -134,16 +143,66 @@
     Maybe a picture to illustrate the idea of GANs.
   }
 
+  % our results
+  \column{0.6}
 
-  \column{0.5}
+  % divide for plots and images
+  \begin{subcolumns}
+    % plots column
+    \subcolumn{0.5}
+    \block{Statistics}{%
+      \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg16cgg19stats.jpeg}%
+      % Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
+    }
+
+    \subcolumn{0.5}
+    \block{Results}{%
+      \includegraphics[width=\linewidth, height=\imageheight, clip, keepaspectratio]{epoch_11_index_10.png}%
+      % Some sample images, low resultion, upsampled by our net(s), original high resolution.
+    }
+  \end{subcolumns}
+
+  \begin{subcolumns}
+    \subcolumn{0.5}
+    \block{Statistics2}{%
+      \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg16cgg19stats.jpeg}%
+      % Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
+    }
+    
+    % images column
+    \subcolumn{0.5}
+    \block{Results2}{%
+      \includegraphics[width=\linewidth, height=\imageheight, clip, keepaspectratio]{epoch_11_index_10.png}%
+      % Some sample images, low resultion, upsampled by our net(s), original high resolution.
+    }
+    
+  \end{subcolumns}
+  % now the keypoints of our project
   
-  \block{Statistics}{%
-    Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
+  \block[]{Main Results}{%
+    \begin{itemize}
+    \item Networks learn even without discriminator
+    \item Seemingly the training is faster with the use of a
+      discriminator.
+    \item Metrics do not change significantly after some training but
+      the images get better
+    \item In some settings the discriminator ``dies'' but images still
+      improve
+    \item Discriminator loss is extreme, either very low or very
+      large; the transition is rapid
+    \item Training the networks is tricky, discriminator ``dies''
+      often
+    \item Visually the images change very much at beginning of
+      training
+    \item The visual perception of the images changes for a long
+      training time. Details added at late stages make the images seem
+      more like actual photographs.
+    \item We could not see the large jumps for the discriminator that
+      was shown in the paper.
+    \end{itemize}
   }
 
-  \block{Results}{%
-    Some sample images, low resultion, upsampled by our net(s), original high resolution.
-  }
+
   
 \end{columns}
 
