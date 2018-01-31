@@ -1,5 +1,7 @@
 import cv2
 import os
+import time
+from matplotlib import pyplot as plt
 
 PATH_INPUT = "data/live/input/"
 PATH_OUTPUT = "data/live/output/"
@@ -29,9 +31,16 @@ while True:
         # SPACE pressed
         img_name = "live_srgan_{}.png".format(img_counter)
         img_in_path = os.path.join(PATH_INPUT, img_name)
-        cv2.imwrite(img_name, frame)
-        os.system("python srgan/run_test --folder " + str(PATH_INPUT))
+        cv2.imwrite(img_in_path, frame)
         print("{} written!".format(img_name))
+        os.system("python srgan/run_test.py --folder " + str(PATH_INPUT) + " --outfolder " + str(PATH_OUTPUT))
+        time.sleep(2)
+        #os.remove(img_in_path)
+        print("{} deleted!".format(img_name))
+        img_out_path = os.path.join(PATH_OUTPUT + "4/", img_name)
+        img_out = cv2.imread(img_out_path)
+        cv2.imshow('image', img_out)
+        cv2.waitKey(0)
         img_counter += 1
 
 cam.release()
