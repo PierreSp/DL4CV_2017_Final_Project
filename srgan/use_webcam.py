@@ -35,7 +35,7 @@ while True:
         print("{} written!".format(img_name))
         os.system("python srgan/run_test.py --folder " + str(PATH_INPUT) + " --outfolder " + str(PATH_OUTPUT))
         time.sleep(2)
-        #os.remove(img_in_path)
+        os.remove(img_in_path)
         print("{} deleted!".format(img_name))
         img_out_path = os.path.join(PATH_OUTPUT + "4/", img_name)
         img_out = cv2.imread(img_out_path)
