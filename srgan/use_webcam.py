@@ -55,27 +55,36 @@ while True:
         print("{} written!".format(img_name))
         test_set = TestDatasetFromFolderPierre(
             str(FOLDERNAME), upscale_factor=UPSCALE_FACTOR)
-        test_loader = DataLoader(dataset=test_set, num_workers=4,
+        test_loader = DataLoader(dataset=test_set, num_workers=5,
                                  batch_size=1, shuffle=False)
         test_bar = tqdm(test_loader, desc='[testing datasets]')
 
-        for image_name, lr_image, hr_restore_img, hr_image in test_bar:
+        for image_name, lr_image, hr_restore_img, hr_restore_img_bi, hr_image in test_bar:
             image_name = image_name[0]
             lr_image = Variable(lr_image, volatile=True)
             hr_image = Variable(hr_image, volatile=True)
             sr_image = model(lr_image)
             test_images = torch.stack(
-                [display_transform()(hr_restore_img.squeeze(0)), display_transform()(hr_image.data.cpu().squeeze(0)),
-                 display_transform()(sr_image.data.cpu().squeeze(0))])
-            image = utils.make_grid(test_images, nrow=3, padding=5)
+                [display_transform()(sr_image.data.cpu().squeeze(0)),
+                 display_transform()(hr_restore_img.squeeze(0)),
+                 display_transform()(hr_image.data.cpu().squeeze(0)),
+                 display_transform()(hr_restore_img_bi.cpu().squeeze(0))])
+            image = utils.make_grid(test_images, nrow=2, padding=5)
             utils.save_image(image, OUT_PATH + image_name, padding=5)
         os.remove(img_in_path)
         print("{} deleted!".format(img_name))
         img_out_path = os.path.join(PATH_OUTPUT + "4/", img_name)
         img_out = cv2.imread(img_out_path)
         cv2.imshow('image', img_out)
-        cv2.waitKey(0)
+        while True:
+            k = cv2.waitKey(1)
+            if k % 256 == 32:
+                cv2.destroyWindow('image')
+                break
+
+        #cv2.waitKey(0)
         img_counter += 1
+
 
 cam.release()
 

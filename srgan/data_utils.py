@@ -127,12 +127,14 @@ class TestDatasetFromFolderPierre(Dataset):
         crop_size = calculate_valid_crop_size(min(w, h), self.upscale_factor)
         lr_scale = Resize(crop_size // self.upscale_factor,
                           interpolation=Image.BICUBIC)
-        hr_scale = Resize(crop_size, interpolation=Image.BICUBIC)
+        hr_scale = Resize(crop_size, interpolation=Image.NEAREST)
+        hr_scale_bi = Resize(crop_size, interpolation=Image.BICUBIC)
         hr_image = CenterCrop(crop_size)(hr_image)
         lr_image = lr_scale(hr_image)
         hr_restore_img = hr_scale(lr_image)
+        hr_restore_img_bi = hr_scale_bi(lr_image)
         image_name = self.image_filenames[index].split('/')[-1]
-        return image_name, ToTensor()(lr_image), ToTensor()(hr_restore_img), ToTensor()(hr_image)
+        return image_name, ToTensor()(lr_image), ToTensor()(hr_restore_img), ToTensor()(hr_restore_img_bi), ToTensor()(hr_image)
 
     def __len__(self):
         return len(self.image_filenames)
