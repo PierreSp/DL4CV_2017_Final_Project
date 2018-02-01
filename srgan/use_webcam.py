@@ -75,14 +75,17 @@ while True:
         print("{} deleted!".format(img_name))
         img_out_path = os.path.join(PATH_OUTPUT + "4/", img_name)
         img_out = cv2.imread(img_out_path)
+        cv2.namedWindow("image", 0)
+        cv2.destroyWindow("SRGAN_LIVE")
         cv2.imshow('image', img_out)
         while True:
             k = cv2.waitKey(1)
             if k % 256 == 32:
                 cv2.destroyWindow('image')
+                cv2.namedWindow("SRGAN_LIVE")
                 break
 
-        #cv2.waitKey(0)
+        # cv2.waitKey(0)
         img_counter += 1
 
 
