@@ -204,8 +204,7 @@ GANs consist of two different networks, a Generator Network and a
 Discriminator Network. The concept behind this is that the generative
 network estimates a super-resolved image from its LR version with the
 goal to become highly similar to real images that the discriminator
-network fails to distiguish.  %Hier würde ich im Poster das Bild der
-Netword Architektur einfügen
+network fails to distiguish.
 
 Therefore we optimize the discriminator network $D_{\Theta_D}$ in an
 alternating manner along with the generative network $G_{\Theta_G}$ to
@@ -216,10 +215,10 @@ solve the adversarial min-max problem:
 [\text{log} (1-G_{\Theta_G}(I^{LR}))]
 \end{align*}
 
-%\begin{figure}[h]
+\begin{tikzfigure}[h]
   \centering
   \includegraphics[width=\linewidth]{gan.png}
-%\end{figure}
+\end{tikzfigure}
 
   The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:
   \begin{equation*}
@@ -296,7 +295,7 @@ solve the adversarial min-max problem:
       \subcaptionbox{VGG1619 adversarial loss}[0.18\linewidth]{%
         \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_a}
       }
-      \subcaptionbox{VGG1618 image loss}[0.18\linewidth]{%
+      \subcaptionbox{VGG1619 image loss}[0.18\linewidth]{%
         \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_i}
       }
       \subcaptionbox{VGG19 perception, adversarial, image loss}[0.18\linewidth]{%
