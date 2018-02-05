@@ -1,0 +1,145 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{tgbonum}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Super-Resolution with GANs}
+
+\author{Nathanael Bosch\\
+{\tt\small nathanael.bosch@tum.de}
+\and
+Thomas Grassinger\\
+{\tt\small thomas.grassinger@tum.de}
+\and
+Jonas Kipfstuhl\\
+{\tt\small jonas.kipfstuhl@tum.de}
+\and
+Pierre Springer\\
+{\tt\small pierre.springer@tum.de}
+%\and
+%Team Member 5\\
+%{\tt\small fifth@i1.org}
+}
+
+
+\maketitle
+%\thispagestyle{empty}
+
+\section{Introduction}
+We call super-resolution (SR) the task of estimating a high-resolution
+(HR) image from its low-resolution (LR) counterpart. Recent work with
+optmizition-based methods largely focuses on minimizing the mean
+squared reconstruction error. This results in high peak
+signal--to--noise ratios, but they often have problems with modelling
+high--frequency details. The results are often too smooth. In our work
+we tried to tackle this problem using generative adversarial networks
+(GANs).
+
+% Dieser Abschnitt als kleine Einleitung, grober Überblick
+% über: was ist unsere Problemstellung, was gibt es dazu bereits bzw wie
+% wird versucht das Problem zu lösen und was ist die Schwierigkeit
+% dabei.
+
+\section{GANs}
+GANs consist of two different networks, a Generator Network and a
+Discriminator Network. The concept behind this is that the generative
+network estimates a super-resolved image from its LR version with the
+goal to become highly similar to real images that the discriminator
+network fails to distiguish.  %Hier würde ich im Poster das Bild der
+Netword Architektur einfügen
+
+Therefore we optimize the discriminator network $D_{\Theta_D}$ in an
+alternating manner along with the generative network $G_{\Theta_G}$ to
+solve the adversarial min-max problem:\\
+$G_{\Theta_G}$ to solve adversarial min-max problem:
+\begin{align*}
+  min_{\Theta_G} max_{\Theta_G} &\mathbb{E}_{I^{HR} \backsim p_{\text{train}}(I^{HR})} [\text{log} D_{\Theta_D}(I^{HR})] \\
+  +&\mathbb{E}_{I^{HR} \backsim p_G(I^{LR})} [\text{log} (1-G_{\Theta_G}(I^{LR}))]
+\end{align*}
+% schaut bisschen komisch aus mit der Formel über die 2 Seiten
+% (den Satz mit der Formel würde ich auf dem Poster rauslassen,
+% außerdem auf die Netzwerk Architektur der beiden Netze nicht näher
+% eingehen (sind halt deep nets mit conv layern))
+The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:\\
+\begin{equation*}
+  l^{SR}=\alpha l^{SR}_{MSE} + \beta l^{SR}_{VGG16_19/i.j} + \gamma l^{SR}_{D}
+\end{equation*}
+More precisely, the content loss components are defined as follows:
+\begin{align*}
+  l^{SR}_{MSE}       &= \frac{1}{r^2WH}\sum_{x=1}^{rW}\sum_{y=1}^{rH}(I^{HR}_{x,y}-G_{\theta_G}(I^{LR})_{x,y})^2 \\
+  l^{SR}_{VGG1619/i.j}&=\frac{1}{W_{i,j}H_{i,j}} \sum_{x=1}^{W_{i,j}}\sum_{y=1}^{H_{i,j}}(\Phi_{i,j}(I^{HR})_{x,y}-\Phi_{i,j}(G_{\Theta_G}(I^{LR}))_{x,y}^2
+\end{align*}
+the discriminative loss as follows
+\begin{equation*}  
+  l^{SR}_{D}=\sum_{n=1}^N -\text{log}D_{\Theta_D}(G_{\Theta_G}(I^{LR}))
+\end{equation*}
+\section{Setup}
+\label{sec:setup}
+
+% what we used for our work
+
+\subsection{Dataset}
+\label{sec:data}
+
+For training we used the PASCAL VOC Dataset\cite{pascal-voc-2012} with
+more than 10,000 images as well as the NITRE
+Dataset\cite{Agustsson_2017_CVPR_Workshops} with 800 images.
+% our datasets
+
+\subsection{Networks}
+\label{sec:nets}
+
+We used pretrained VGG networks in different configurations. The best
+results were obtained when we used a VGG1619 network. We also
+considered a VGG 16 network. Although faster at training it did not
+yield results of equal quality.
+
+% the Networks, e.g. VGG16, VGG19, VGG16/19
+
+\section{Results}
+\label{sec:results}
+
+% our results => main section
+% discriminatro may be omitted
+% better nets work better
+% ...
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+% something about what we learned
+
+\appendix
+%%% Appendix
+% include images
+% include graphs
+
+{
+  \nocite{*}                      % also those references without \cite{·}
+  \small
+  \bibliographystyle{ieee}
+  \bibliography{bib}
+  
+}
+\end{document}
