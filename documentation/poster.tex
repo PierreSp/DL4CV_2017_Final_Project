@@ -24,6 +24,8 @@
 
 \usepackage[final]{microtype}   % improve typography, e.g. kerning
 
+\usepackage{subcaption}
+\AtBeginEnvironment{tikzfigure}{\captionsetup{type=figure}}
 
 
 \usepackage{authblk}
@@ -147,7 +149,7 @@
 \usepackage{url}
 
 % graphics
-\graphicspath{{../logs/results/}}
+\graphicspath{{../logs/results/},{results/}}
 
 \let\thempfootnote\thefootnote%http://tex.stackexchange.com/questions/956/footnotemark-and-footnotetext-in-minipage#959
 \newcommand\printfootnote[1]{% to get different numbers for different footnotes
@@ -214,6 +216,27 @@ solve the adversarial min-max problem:
 [\text{log} (1-G_{\Theta_G}(I^{LR}))]
 \end{align*}
 
+%\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{gan.png}
+%\end{figure}
+
+  The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:
+  \begin{equation*}
+    l^{SR}=\alpha l^{SR}_{MSE} + \beta l^{SR}_{VGG16_19/i.j} + \gamma l^{SR}_{D}
+  \end{equation*}
+  Where $l^{SR}_{MSE}$ is a mean squared error term, $l^{SR}_{VGG}$ is
+  an euclidean distance of the VGG feature representation for the
+  images, and $l^{SR}_{D}$ is the discriminative loss.
+  
+  % More precisely, the content loss components are defined as follows:\\
+  % $l^{SR}_{MSE}= \frac{1}{r^2WH}\sum_{x=1}^{rW}\sum_{y=1}^{rH}(I^{HR}_{x,y}-G_{\theta_G}(I^{LR})_{x,y})^2$\\
+  % $l^{SR}_{VGG1619/i.j}={\frac{1}{W_{i,j}H_{i,j}} \sum_{x=1}^{W_{i,j}}\sum_{y=1}^{H_{i,j}}(\Phi_{i,j}(I^{HR})_{x,y}-\Phi_{i,j}(G_{\Theta_G}(I^{LR}))_{x,y}}^2$\\
+  % the discriminative loss as follows\\
+  % $l^{SR}_{D}=\sum_{n=1}^N
+  % -\text{log}D_{\Theta_D}(G_{\Theta_G}(I^{LR}))$
+
+  
 % \\ \\ min$_{\Theta_G}$ max$_{\Theta_G}$
 % $\mathbb{E}_{I^{HR} \backsim p_{\text{train}}(I^{HR})} [\text{log}
 % D_{\Theta_D}(I^{HR})]+\mathbb{E}_{I^{HR} \backsim p_G(I^{LR})}
@@ -249,58 +272,83 @@ solve the adversarial min-max problem:
   \column{0.6}
 
   % divide for plots and images
-  \begin{subcolumns}
-    % plots column
-    \subcolumn{0.5}
-    \block{Statistics}{%
-      \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg16cgg19stats.jpeg}%
-      % Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
-    }
+  \block{Results}{
 
-    \subcolumn{0.5}
-    \block{Results}{%
-      \includegraphics[width=\linewidth, height=\imageheight, clip, keepaspectratio]{epoch_11_index_10.png}%
-      % Some sample images, low resultion, upsampled by our net(s), original high resolution.
-    }
-  \end{subcolumns}
+    \begin{tikzfigure}
+      \subcaptionbox{VGG1619 perceptual, adversarial, image loss}[0.18\linewidth]{%
+        \includegraphics[width=0.33\linewidth, height=\imageheight, keepaspectratio]{vgg1619_p_a_i}
+      }
+      \subcaptionbox{VGG1619 perceptual, adversarial loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_p_a}
+      }
+      \subcaptionbox{VGG1619 perceptual, image loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_p_i}
+      }
+      \subcaptionbox{VGG1619 perceptual loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_p}
+      }
+      \subcaptionbox{VGG1619 adversarial, image loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_a_i}
+      }
+    \end{tikzfigure}
 
-  \begin{subcolumns}
-    \subcolumn{0.5}
-    \block{Statistics2}{%
-      \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg16cgg19stats.jpeg}%
-      % Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
-    }
-    
-    % images column
-    \subcolumn{0.5}
-    \block{Results2}{%
-      \includegraphics[width=\linewidth, height=\imageheight, clip, keepaspectratio]{epoch_11_index_10.png}%
-      % Some sample images, low resultion, upsampled by our net(s), original high resolution.
-    }
-    
-  \end{subcolumns}
-  % now the keypoints of our project
+    \begin{tikzfigure}
+      \subcaptionbox{VGG1619 adversarial loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_a}
+      }
+      \subcaptionbox{VGG1618 image loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg1619_i}
+      }
+      \subcaptionbox{VGG19 perception, adversarial, image loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg19_p_a_i}
+      }
+      \subcaptionbox{VGG16 perception, adversarial, image loss}[0.18\linewidth]{%
+        \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg16_p_a_i}
+        }
+    \end{tikzfigure}
+  }
   
-  \block[]{Main Results}{%
+  % \begin{subcolumns}
+  %   \subcolumn{0.5}
+  %   \block{Statistics2}{%
+  %     \includegraphics[width=\linewidth, height=\imageheight, keepaspectratio]{vgg16cgg19stats.jpeg}%
+  %     % Some plots for clarifying the performance and distinguishing different Network models, e.\,g., VGG16, VGG19.
+  %   }
+    
+  %   % images column
+  %   \subcolumn{0.5}
+  %   \block{Results2}{%
+  %     \includegraphics[width=\linewidth, height=\imageheight, clip, keepaspectratio]{epoch_11_index_10.png}%
+  %     % Some sample images, low resultion, upsampled by our net(s), original high resolution.
+  %   }
+    
+  % \end{subcolumns}
+  % % now the keypoints of our project
+  
+  \block[]{Key Points}{%
     \begin{itemize}
     \item Networks learn even without discriminator
-    \item Seemingly the training is faster with the use of a
-      discriminator.
-    \item Metrics do not change significantly after some training but
-      the images get better
-    \item In some settings the discriminator ``dies'' but images still
-      improve
-    \item Discriminator loss is extreme, either very low or very
-      large; the transition is rapid
-    \item Training the networks is tricky, discriminator ``dies''
-      often
-    \item Visually the images change very much at beginning of
-      training
-    \item The visual perception of the images changes for a long
-      training time. Details added at late stages make the images seem
-      more like actual photographs.
-    \item We could not see the large jumps for the discriminator that
-      was shown in the paper.
+    \item VGG1619 performs considerably better than VGG16
+    \item Training works without discriminator
+    \item The discriminator is hard to train
+    \item Image metrics don't change much, but the images still improve
+    % \item Seemingly the training is faster with the use of a
+    %   discriminator.
+    % \item Metrics do not change significantly after some training but
+    %   the images get better
+    % \item In some settings the discriminator ``dies'' but images still
+    %   improve
+    % \item Discriminator loss is extreme, either very low or very
+    %   large; the transition is rapid
+    % \item Training the networks is tricky, discriminator ``dies''
+    %   often
+    % \item Visually the images change very much at beginning of
+    %   training
+    % \item The visual perception of the images changes for a long
+    %   training time. Details added at late stages make the images seem
+    %   more like actual photographs.
+    % \item We could not see the large jumps for the discriminator that
+    %   was shown in the paper.
     \end{itemize}
   }
 
