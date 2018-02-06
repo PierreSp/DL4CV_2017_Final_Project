@@ -56,24 +56,21 @@ Pierre Springer\\
 \section{Introduction}
 We call super-resolution (SR) the task of estimating a high-resolution
 (HR) image from its low-resolution (LR) counterpart. Recent work with
-optmizition-based methods largely focuses on minimizing the mean
-squared reconstruction error. This results in high peak
-signal--to--noise ratios, but they often have problems with modelling
-high--frequency details. The results are often too smooth. In our work
-we tried to tackle this problem using generative adversarial networks
-(GANs).
+optimization-based methods largely focuses on minimizing the mean
+squared reconstruction error, which results in high peak
+signal--to--noise ratios (PSNR) but very smooth pictures.
 
-% Dieser Abschnitt als kleine Einleitung, grober Überblick
-% über: was ist unsere Problemstellung, was gibt es dazu bereits bzw wie
-% wird versucht das Problem zu lösen und was ist die Schwierigkeit
-% dabei.
+The authors of the paper\cite{LedigChristian2016PSIS} propose using a
+generative adversarial network (GAN) with an improved loss function.
+We reimplemented the paper and questioned the purpose of the
+discriminator and the suggested loss function.
 
 \section{GANs}
 GANs consist of two different networks, a Generator Network and a
 Discriminator Network. The concept behind this is that the generative
 network estimates a super-resolved image from its LR version with the
 goal to become highly similar to real images that the discriminator
-network fails to distiguish.
+network fails to distinguish.
 
 Therefore we optimize the discriminator network $D_{\Theta_D}$ in an
 alternating manner along with the generative network $G_{\Theta_G}$ to
@@ -82,7 +79,7 @@ solve the adversarial min-max problem:
   min_{\Theta_G} max_{\Theta_G} &\mathbb{E}_{I^{HR} \backsim p_{\text{train}}(I^{HR})} [\text{log} D_{\Theta_D}(I^{HR})] \\
   +&\mathbb{E}_{I^{HR} \backsim p_G(I^{LR})} [\text{log} (1-G_{\Theta_G}(I^{LR}))]
 \end{align*}
-The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:
+The perceptual loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:
 \begin{equation*}
   l^{SR}=\alpha l^{SR}_{MSE} + \beta l^{SR}_{VGG16_19/i.j} + \gamma l^{SR}_{D}
 \end{equation*}
@@ -132,7 +129,7 @@ We observed that the widely used metrics, SSIM and PSNE, i.\;e.,
 structural similarity and peak signal to noise ratio respectively, are
 not sufficient for our purposes. This observation was also made by
 other authors dealing with image super resolution. Therefore, in
-addtion to the numerical values of the metrics, we also had to trust
+addition to the numerical values of the metrics, we also had to trust
 our perception of the images. This is similar to the mean opinion
 score (MOS) used in~\cite{LedigChristian2016PSIS}.
 
@@ -169,11 +166,11 @@ values of the paper, see figure~\ref{fig:comp}.
   \caption{Comparison of several loss configurations}
 \end{figure*}
 
-The curves of the PSNV and SSIM values during training may be seen in
+The curves of the PSNR and SSIM values during training may be seen in
 figure~\ref{fig:plots}.
 \begin{figure*}[h]
   \centering
-
+  \captionsetup{}
   \subcaptionbox{}[0.4\linewidth]{%
     \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113139_679.jpg}
   }
@@ -204,9 +201,9 @@ figure~\ref{fig:plots}.
 
 \section{Conclusion}
 \label{sec:conclusion}
-One main point is, the training. It was very hard to keep the
-dicriminator and the generator in line. Often we killed our
-discriminator sucht that it could not contribute anymore.
+One main point is the training. It was very hard to keep the
+discriminator and the generator in line. Often we killed our
+discriminator such that it could not contribute anymore.
 
 We also observed that super resolution works even without any
 discriminator activated, as was suggested by the paper we started
