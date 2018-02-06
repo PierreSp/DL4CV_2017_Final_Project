@@ -8,6 +8,8 @@
 \usepackage{amssymb}
 
 % Include other packages here, before hyperref.
+\usepackage{graphicx}
+
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -66,8 +68,8 @@ GANs consist of two different networks, a Generator Network and a
 Discriminator Network. The concept behind this is that the generative
 network estimates a super-resolved image from its LR version with the
 goal to become highly similar to real images that the discriminator
-network fails to distiguish.  %Hier würde ich im Poster das Bild der
-Netword Architektur einfügen
+network fails to distiguish.
+% evtl Bild
 
 Therefore we optimize the discriminator network $D_{\Theta_D}$ in an
 alternating manner along with the generative network $G_{\Theta_G}$ to
@@ -77,20 +79,17 @@ $G_{\Theta_G}$ to solve adversarial min-max problem:
   min_{\Theta_G} max_{\Theta_G} &\mathbb{E}_{I^{HR} \backsim p_{\text{train}}(I^{HR})} [\text{log} D_{\Theta_D}(I^{HR})] \\
   +&\mathbb{E}_{I^{HR} \backsim p_G(I^{LR})} [\text{log} (1-G_{\Theta_G}(I^{LR}))]
 \end{align*}
-% schaut bisschen komisch aus mit der Formel über die 2 Seiten
-% (den Satz mit der Formel würde ich auf dem Poster rauslassen,
-% außerdem auf die Netzwerk Architektur der beiden Netze nicht näher
-% eingehen (sind halt deep nets mit conv layern))
 The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:\\
 \begin{equation*}
   l^{SR}=\alpha l^{SR}_{MSE} + \beta l^{SR}_{VGG16_19/i.j} + \gamma l^{SR}_{D}
 \end{equation*}
 More precisely, the content loss components are defined as follows:
 \begin{align*}
-  l^{SR}_{MSE}       &= \frac{1}{r^2WH}\sum_{x=1}^{rW}\sum_{y=1}^{rH}(I^{HR}_{x,y}-G_{\theta_G}(I^{LR})_{x,y})^2 \\
-  l^{SR}_{VGG1619/i.j}&=\frac{1}{W_{i,j}H_{i,j}} \sum_{x=1}^{W_{i,j}}\sum_{y=1}^{H_{i,j}}(\Phi_{i,j}(I^{HR})_{x,y}-\Phi_{i,j}(G_{\Theta_G}(I^{LR}))_{x,y}^2
+  l^{SR}_{M SE}       &= \frac{1}{r^2WH}\sum_{x=1}^{rW}\sum_{y=1}^{rH}(I^{HR}_{x,y}-G_{\theta_G}(I^{LR})_{x,y})^2 \\
+  l^{SR}_{VGG1619/i,j}&=\frac{1}{W_{i,j}H_{i,j}} \sum_{x=1}^{W_{i,j}}\sum_{y=1}^{H_{i,j}}(\Phi_{i,j}(I^{HR})_{x,y}-\Phi_{i,j}(G_{\Theta_G}(I^{LR}))_{x,y}^2
 \end{align*}
-the discriminative loss as follows
+with downsampling factor $r$ and $W,H$ defining the tensor size.
+Finally the discriminative loss is defined as follows
 \begin{equation*}  
   l^{SR}_{D}=\sum_{n=1}^N -\text{log}D_{\Theta_D}(G_{\Theta_G}(I^{LR}))
 \end{equation*}
@@ -99,20 +98,20 @@ the discriminative loss as follows
 
 % what we used for our work
 
-\subsection{Dataset}
-\label{sec:data}
+% \subsection{Dataset}
+% \label{sec:data}
 
 For training we used the PASCAL VOC Dataset\cite{pascal-voc-2012} with
 more than 10,000 images as well as the NITRE
 Dataset\cite{Agustsson_2017_CVPR_Workshops} with 800 images.
 % our datasets
 
-\subsection{Networks}
-\label{sec:nets}
+% \subsection{Networks}
+% \label{sec:nets}
 
 We used pretrained VGG networks in different configurations. The best
 results were obtained when we used a VGG1619 network. We also
-considered a VGG 16 network. Although faster at training it did not
+considered a VGG16 network. Although faster at training it did not
 yield results of equal quality.
 
 % the Networks, e.g. VGG16, VGG19, VGG16/19
@@ -124,6 +123,19 @@ yield results of equal quality.
 % discriminatro may be omitted
 % better nets work better
 % ...
+
+% images
+We observed that the widely used metrics, SSIM and PSNE, i.\;e.,
+structural similarity and peak signal to noise ratio respectively, are
+not sufficient for our purposes. This observation was also made by
+other authors dealing with image super resolution. Therefore, in
+addtion to the numerical values of the metrics, we also had to trust
+our perception of the images. This is similar to the mean opinion
+score (MOS) used in~\cite{LedigChristian2016PSIS}.
+
+For comparison we include some samples of a image, that has been
+super--resolved by our methods.
+
 
 \section{Conclusion}
 \label{sec:conclusion}
