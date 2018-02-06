@@ -74,17 +74,15 @@ Discriminator Network. The concept behind this is that the generative
 network estimates a super-resolved image from its LR version with the
 goal to become highly similar to real images that the discriminator
 network fails to distiguish.
-% evtl Bild
 
 Therefore we optimize the discriminator network $D_{\Theta_D}$ in an
 alternating manner along with the generative network $G_{\Theta_G}$ to
-solve the adversarial min-max problem:\\
-$G_{\Theta_G}$ to solve adversarial min-max problem:
+solve the adversarial min-max problem:
 \begin{align*}
   min_{\Theta_G} max_{\Theta_G} &\mathbb{E}_{I^{HR} \backsim p_{\text{train}}(I^{HR})} [\text{log} D_{\Theta_D}(I^{HR})] \\
   +&\mathbb{E}_{I^{HR} \backsim p_G(I^{LR})} [\text{log} (1-G_{\Theta_G}(I^{LR}))]
 \end{align*}
-The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:\\
+The perceputal loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:
 \begin{equation*}
   l^{SR}=\alpha l^{SR}_{MSE} + \beta l^{SR}_{VGG16_19/i.j} + \gamma l^{SR}_{D}
 \end{equation*}
@@ -138,9 +136,9 @@ addtion to the numerical values of the metrics, we also had to trust
 our perception of the images. This is similar to the mean opinion
 score (MOS) used in~\cite{LedigChristian2016PSIS}.
 
-For comparison we include some samples of a image, that has been
-super--resolved by our methods.
-
+For comparison of the generated images with several loss
+configurations, i.e. setting the coefficients to zero or using the
+values of the paper, see figure~\ref{fig:comp}.
 \begin{figure*}[h]
   \centering
   \subcaptionbox{VGG1619 perceptual, adversarial, image loss}[0.2\linewidth]{%
@@ -167,7 +165,41 @@ super--resolved by our methods.
   \subcaptionbox{VGG16 perception, adversarial, image loss}[0.2\linewidth]{%
     \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg16_p_a_i}
   }
-%  \caption{Comparison of several loss configurations}
+  \label{fig:comp}
+  \caption{Comparison of several loss configurations}
+\end{figure*}
+
+The curves of the PSNV and SSIM values during training may be seen in
+figure~\ref{fig:plots}.
+\begin{figure*}[h]
+  \centering
+
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113139_679.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113143_300.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113147_469.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113150_955.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113156_419.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113200_011.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113202_817.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113206_502.jpg}
+  }  
+  \caption{Curves of metrics during training}
+  \label{fig:plots}
 \end{figure*}
 
 \section{Conclusion}
