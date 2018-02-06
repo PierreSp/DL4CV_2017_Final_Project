@@ -1,20 +1,15 @@
 \documentclass[10pt,twocolumn,letterpaper]{article}
 
 \usepackage{cvpr}
-% \usepackage{times}
-
-\usepackage{tgbonum} % TeX Gyre Bonum
-% if we need a smaller font, i.e. narrower then
-% \usepackage{tgtermes} % TeX Gyre Termes
-% for other fonts need LuaTeX (or at least XeTeX)
-
+\usepackage{tgbonum}
 \usepackage{epsfig}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
 
-
 % Include other packages here, before hyperref.
+\usepackage{graphicx}
+\usepackage{subcaption}
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -28,6 +23,11 @@
 
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 \ifcvprfinal\pagestyle{empty}\fi
+
+\graphicspath{{results/}}
+\newlength{\imagewidth}
+
+
 \begin{document}
 
 %%%%%%%%% TITLE
@@ -54,22 +54,65 @@ Pierre Springer\\
 %\thispagestyle{empty}
 
 \section{Introduction}
-\label{sec:intro}
+We call super-resolution (SR) the task of estimating a high-resolution
+(HR) image from its low-resolution (LR) counterpart. Recent work with
+optimization-based methods largely focuses on minimizing the mean
+squared reconstruction error, which results in high peak
+signal--to--noise ratios (PSNR) but very smooth pictures.
 
-% The idea and problem statement
+The authors of the paper\cite{LedigChristian2016PSIS} propose using a
+generative adversarial network (GAN) with an improved loss function.
+We reimplemented the paper and questioned the purpose of the
+discriminator and the suggested loss function.
 
+\section{GANs}
+GANs consist of two different networks, a Generator Network and a
+Discriminator Network. The concept behind this is that the generative
+network estimates a super-resolved image from its LR version with the
+goal to become highly similar to real images that the discriminator
+network fails to distinguish.
+
+Therefore we optimize the discriminator network $D_{\Theta_D}$ in an
+alternating manner along with the generative network $G_{\Theta_G}$ to
+solve the adversarial min-max problem:
+\begin{align*}
+  min_{\Theta_G} max_{\Theta_G} &\mathbb{E}_{I^{HR} \backsim p_{\text{train}}(I^{HR})} [\text{log} D_{\Theta_D}(I^{HR})] \\
+  +&\mathbb{E}_{I^{HR} \backsim p_G(I^{LR})} [\text{log} (1-G_{\Theta_G}(I^{LR}))]
+\end{align*}
+The perceptual loss $l^{SR}$ we defined as weighted sum of a content loss and an discriminative loss component:
+\begin{equation*}
+  l^{SR}=\alpha l^{SR}_{MSE} + \beta l^{SR}_{VGG16_19/i.j} + \gamma l^{SR}_{D}
+\end{equation*}
+More precisely, the content loss components are defined as follows:
+\begin{align*}
+  l^{SR}_{M SE}       &= \frac{1}{r^2WH}\sum_{x=1}^{rW}\sum_{y=1}^{rH}(I^{HR}_{x,y}-G_{\theta_G}(I^{LR})_{x,y})^2 \\
+  l^{SR}_{VGG1619/i,j}&=\frac{1}{W_{i,j}H_{i,j}} \sum_{x=1}^{W_{i,j}}\sum_{y=1}^{H_{i,j}}(\Phi_{i,j}(I^{HR})_{x,y}-\Phi_{i,j}(G_{\Theta_G}(I^{LR}))_{x,y}^2
+\end{align*}
+with downsampling factor $r$ and $W,H$ defining the tensor size.
+Finally the discriminative loss is defined as follows:
+\begin{equation*}  
+  l^{SR}_{D}=\sum_{n=1}^N -\text{log}D_{\Theta_D}(G_{\Theta_G}(I^{LR}))
+\end{equation*}
 \section{Setup}
 \label{sec:setup}
 
 % what we used for our work
 
-\subsection{Dataset}
-\label{sec:data}
+% \subsection{Dataset}
+% \label{sec:data}
 
+For training we used the PASCAL VOC Dataset\cite{pascal-voc-2012} with
+more than 10,000 images as well as the NITRE
+Dataset\cite{Agustsson_2017_CVPR_Workshops} with 800 images.
 % our datasets
 
-\subsection{Networks}
-\label{sec:nets}
+% \subsection{Networks}
+% \label{sec:nets}
+
+We used pretrained VGG networks in different configurations. The best
+results were obtained when we used a VGG1619 network. We also
+considered a VGG16 network. Although faster at training it did not
+yield results of equal quality.
 
 % the Networks, e.g. VGG16, VGG19, VGG16/19
 
@@ -81,8 +124,93 @@ Pierre Springer\\
 % better nets work better
 % ...
 
+% images
+We investigated on the proposed loss by the authors
+of~\cite{LedigChristian2016PSIS}, by training multiple networks with
+only parts of the loss. The reults can be seen in figure~\ref{fig:comp}.
+
+
+\begin{figure*}[h]
+  \centering
+  \subcaptionbox{VGG1619 perceptual, adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p_a_i}
+  }
+  \subcaptionbox{VGG1619 perceptual, adversarial loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p_a}
+  }
+  \subcaptionbox{VGG1619 perceptual, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p_i}
+  }
+  \subcaptionbox{VGG1619 perceptual loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p}
+  }
+  \subcaptionbox{VGG1619 adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_a_i}
+  }
+  \subcaptionbox{VGG1619 image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_i}
+  }
+  \subcaptionbox{VGG19 perception, adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg19_p_a_i}
+  }
+  \subcaptionbox{VGG16 perception, adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg16_p_a_i}
+  }
+  \caption{Comparison of several loss configurations}
+  \label{fig:comp}
+\end{figure*}
+
+The curves of the PSNR and SSIM (structural similarities) values
+during training may be seen in figure~\ref{fig:plots}.
+\begin{figure*}[h]
+  \centering
+  \captionsetup{}
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113139_679.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113143_300.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113147_469.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113150_955.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113156_419.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113200_011.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113202_817.jpg}
+  }
+  \subcaptionbox{}[0.4\linewidth]{%
+    \includegraphics[width=0.4\linewidth, keepaspectratio]{IMG_20180206_113206_502.jpg}
+  }  
+  \caption{Curves of metrics during training}
+  \label{fig:plots}
+\end{figure*}
+
+
+We observed that those widely used metrics are not sufficient for our
+purposes.  While they did not change anymore during training,
+the visual appearence still improved.  This observation was also made
+the authors of~\cite{LedigChristian2016PSIS}.
+
 \section{Conclusion}
 \label{sec:conclusion}
+In our work we achieved very good results using the proposed loss and
+the residual network. During our analysis we found the perceptual loss
+to be crucial for achieving high performance, but when used on its own
+it led to weird artifacts in the output images.
+
+The removal of the discriminator had no impact on the resulting image
+quality in our work, as the generator performs very well with the
+other parts of the loss. This leads to huge difficultuies in training
+the GAN.
+
 
 % something about what we learned
 
@@ -98,117 +226,4 @@ Pierre Springer\\
   \bibliography{bib}
   
 }
-
-
-
-%%%%%%
-% Text of the proposal
-% this may be reused in parts.
-%
-% \section{Introduction} The goal of this project is to gain a deeper
-% understanding of Generative Adversarial Networks. We will then apply
-% them to the image super resolution problem.  %and try different
-% applications, so we probably won't invent new applications or methods
-% for GANs, but will try different architectures, loss functions and
-% applications for GANs (see \cite{Overview}).  %Depending on the
-% conflicts with the data acquisition, server problems and the time it
-% takes to understand GANs, we want to use the structure of the network
-% to work on different problems.  %As there are more than 250 papers
-% about GANs in arXiv, we collected a small set of interesting topics
-% (see \ref{rel_work}) which we will consider in our work.
-
-
-%     \subsection{Related Works}
-%     \label{rel_work}
-%         \begin{itemize}
-%         \item Generative Adversarial Networks \cite{Goodfellow2014}
-%         \item Generative Adversarial Networks: An Overview
-% \cite{Overview}
-%         %\item Learning to Discover Cross-Domain Relations with
-% Generative Adversarial Networks \cite{Kim2017}
-%         %\item SegAN: Adversarial Network with Multi-scale L1 Loss for
-% Medical Image Segmentation \cite{Kim2017}
-%         \item Photo-Realistic Single Image Super-Resolution Using a
-% Generative Adversarial Network \cite{SuperRes}
-%         %\item Anti-Makeup: Learning A Bi-Level Adversarial Network
-% for Makeup-Invariant Face Verification \cite{MakeUpGAN}
-%         \end{itemize}
-
-% As we did not get responses for all datasets, for now, we decided to
-% work on the Photo-Realistic Single Image Super-Resolution using a
-% Generative Adversarial Network \cite{SuperRes} paper. The main goal is
-% to learn how to increase the resolution of images up to 4 times, while
-% still creating \emph{good} images that look realistic. This is
-% achieved by training Generative Adversarial Networks on downscaled
-% versions of high resolution images. The \emph{generator} part of the
-% GAN will do the actual task of super-resolution, while the
-% \emph{discriminator} is trained to distinguish between real images and
-% super-resolved images. We will compare the results of this approach to
-% regular methods, such as bicubic extrapolation. The work will be
-% mostly based on \cite{SuperRes}.
-
-% \section{Dataset} Our initial work towards \emph{understanding GANs}
-% will use the MNIST and CIFAR-10 datasets, which we already worked with
-% in the lecture and exercises. We will not give detailed explanation to
-% these datasets.  %We already contacted the staff of the Multimodal
-% Brain Tumor Segmentation Challenge to get the brain tumor images but
-% did not get a response yet.
-
-% For the Image Super-Resolution \cite{SuperRes} we will work with the
-% DIV2k dataset \cite{Agustsson_2017_CVPR_Workshops}.  The dataset
-% consists of 1000 2K resolution images divided into: 800 images for
-% training, 100 images for validation, 100 images for testing. As we do
-% not have access to the 100 high resolution test images we will only
-% use the 800+100 images provided, and split into train-validation-test
-% accordingly.  The images are provided in both high and low resolution
-% images for 2, 3, and 4 downscaling factors.  The structure of the
-% given images is \cite{Agustsson_2017_CVPR_Workshops}:
-
-% \begin{quote} For the high resolution images: 0001.png, 0002.png, ...,
-% 1000.png\\ \\ For the downscaled images:\\ YYYYx2.png for downscaling
-% factor x2; where YYYY is the image ID\\ YYYYx3.png for downscaling
-% factor x3; where YYYY is the image ID\\ YYYYx4.png for downscaling
-% factor x4; where YYYY is the image ID
-% \end{quote} We also have access to the ImageNet data but will most
-% likely use a pretrained network to make use of its features such as
-% the VGG network \cite{VGG}, which is already available within
-% torchvision. Detailed information about ImageNet can be found in
-% \cite{imagenet_cvpr09}.
-
-% \section{Methodology} Our initial work will setup on the cs241 course,
-% which treated the basics of GANs and followed the work of
-% \cite{Goodfellow2014}. In this stage, we want to understand what GANs
-% are and how they work, as well as why people use them and which
-% problems they were meant to solve. The cs241 course provides practical
-% guidelines for initial implementations, but also allows us to modify
-% the results and explore the many possibilities. We will start working
-% with the MNIST and CIFAR-10 dataset by applying and comparing
-% different GAN models such as fully connected GAN networks, convolution
-% GAN networks, conditional CNN, and Adversarial Autoencoders to get a
-% understanding of Generative Adversarial Networks.
-
-% In a second step, after having understood the principles of GANs, we
-% will reproduce the results of the super-resolution paper
-% \cite{SuperRes} and try different modifications. These modifications
-% include for example, changing the input features or choosing other
-% pretrained models, such as different VGG layer models or even an
-% entirely different model e.g.\,, AlexNet. Using our knowledge from the
-% initial work on the MNIST and CIFAR data, we might also find other
-% ways to improve our models performance compared to that of the
-% paper. These tasks (working on layers, data engineering, work on
-% pretrained models, further research) can be easily split up, which
-% provides an efficient workflow.
-
-% We would like to use the Google cloud service as presented in the
-% lecture, but the local possibilities of the computer vision group
-% might also be sufficient.  %If time permits we would like to dive
-% deeper into other papers presented in \ref{rel_work}, and then
-% implement and train such a more advanced GAN.
-
-% \section{Outcome} Our target still remains: We want to
-% \textit{understand} GANs!\\ Additionally we want to create a GAN which
-% is able to transform low-resolution images into higher resolutions
-% with similar or even better results as \cite{SuperRes}.
-
-
 \end{document}
