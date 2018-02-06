@@ -9,7 +9,7 @@
 
 % Include other packages here, before hyperref.
 \usepackage{graphicx}
-
+\usepackage{subcaption}
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -23,6 +23,11 @@
 
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 \ifcvprfinal\pagestyle{empty}\fi
+
+\graphicspath{{results/}}
+\newlength{\imagewidth}
+
+
 \begin{document}
 
 %%%%%%%%% TITLE
@@ -136,9 +141,51 @@ score (MOS) used in~\cite{LedigChristian2016PSIS}.
 For comparison we include some samples of a image, that has been
 super--resolved by our methods.
 
+\begin{figure*}[h]
+  \centering
+  \subcaptionbox{VGG1619 perceptual, adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p_a_i}
+  }
+  \subcaptionbox{VGG1619 perceptual, adversarial loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p_a}
+  }
+  \subcaptionbox{VGG1619 perceptual, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p_i}
+  }
+  \subcaptionbox{VGG1619 perceptual loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_p}
+  }
+  \subcaptionbox{VGG1619 adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_a_i}
+  }
+  \subcaptionbox{VGG1619 image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg1619_i}
+  }
+  \subcaptionbox{VGG19 perception, adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg19_p_a_i}
+  }
+  \subcaptionbox{VGG16 perception, adversarial, image loss}[0.2\linewidth]{%
+    \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg16_p_a_i}
+  }
+%  \caption{Comparison of several loss configurations}
+\end{figure*}
 
 \section{Conclusion}
 \label{sec:conclusion}
+One main point is, the training. It was very hard to keep the
+dicriminator and the generator in line. Often we killed our
+discriminator sucht that it could not contribute anymore.
+
+We also observed that super resolution works even without any
+discriminator activated, as was suggested by the paper we started
+with.
+
+Another key learning point is the quality of the produced images. The
+metrics don't change much from some point on but the visual impression
+of the generated images still improves.
+
+
+
 
 % something about what we learned
 
