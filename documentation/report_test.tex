@@ -89,7 +89,7 @@ More precisely, the content loss components are defined as follows:
   l^{SR}_{VGG1619/i,j}&=\frac{1}{W_{i,j}H_{i,j}} \sum_{x=1}^{W_{i,j}}\sum_{y=1}^{H_{i,j}}(\Phi_{i,j}(I^{HR})_{x,y}-\Phi_{i,j}(G_{\Theta_G}(I^{LR}))_{x,y}^2
 \end{align*}
 with downsampling factor $r$ and $W,H$ defining the tensor size.
-Finally the discriminative loss is defined as follows
+Finally the discriminative loss is defined as follows:
 \begin{equation*}  
   l^{SR}_{D}=\sum_{n=1}^N -\text{log}D_{\Theta_D}(G_{\Theta_G}(I^{LR}))
 \end{equation*}
@@ -125,17 +125,11 @@ yield results of equal quality.
 % ...
 
 % images
-We observed that the widely used metrics, SSIM and PSNE, i.\;e.,
-structural similarity and peak signal to noise ratio respectively, are
-not sufficient for our purposes. This observation was also made by
-other authors dealing with image super resolution. Therefore, in
-addition to the numerical values of the metrics, we also had to trust
-our perception of the images. This is similar to the mean opinion
-score (MOS) used in~\cite{LedigChristian2016PSIS}.
+We investigated on the proposed loss by the authors
+of~\cite{LedigChristian2016PSIS}, by training multiple networks with
+only parts of the loss. The reults can be seen in figure~\ref{fig:comp}.
 
-For comparison of the generated images with several loss
-configurations, i.e. setting the coefficients to zero or using the
-values of the paper, see figure~\ref{fig:comp}.
+
 \begin{figure*}[h]
   \centering
   \subcaptionbox{VGG1619 perceptual, adversarial, image loss}[0.2\linewidth]{%
@@ -162,12 +156,12 @@ values of the paper, see figure~\ref{fig:comp}.
   \subcaptionbox{VGG16 perception, adversarial, image loss}[0.2\linewidth]{%
     \includegraphics[width=0.15\linewidth, keepaspectratio]{vgg16_p_a_i}
   }
-  \label{fig:comp}
   \caption{Comparison of several loss configurations}
+  \label{fig:comp}
 \end{figure*}
 
-The curves of the PSNR and SSIM values during training may be seen in
-figure~\ref{fig:plots}.
+The curves of the PSNR and SSIM (structural similarities) values
+during training may be seen in figure~\ref{fig:plots}.
 \begin{figure*}[h]
   \centering
   \captionsetup{}
@@ -199,21 +193,23 @@ figure~\ref{fig:plots}.
   \label{fig:plots}
 \end{figure*}
 
+
+We observed that those widely used metrics are not sufficient for our
+purposes.  While they did not change anymore during training,
+the visual appearence still improved.  This observation was also made
+the authors of~\cite{LedigChristian2016PSIS}.
+
 \section{Conclusion}
 \label{sec:conclusion}
-One main point is the training. It was very hard to keep the
-discriminator and the generator in line. Often we killed our
-discriminator such that it could not contribute anymore.
+In our work we achieved very good results using the proposed loss and
+the residual network. During our analysis we found the perceptual loss
+to be crucial for achieving high performance, but when used on its own
+it led to weird artifacts in the output images.
 
-We also observed that super resolution works even without any
-discriminator activated, as was suggested by the paper we started
-with.
-
-Another key learning point is the quality of the produced images. The
-metrics don't change much from some point on but the visual impression
-of the generated images still improves.
-
-
+The removal of the discriminator had no impact on the resulting image
+quality in our work, as the generator performs very well with the
+other parts of the loss. This leads to huge difficultuies in training
+the GAN.
 
 
 % something about what we learned
